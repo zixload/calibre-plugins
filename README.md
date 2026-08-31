@@ -32,6 +32,18 @@ refuses to guess: a title without a volume marker is left strictly alone.
 
 **[Documentation and installation →](metadata-tidy/)**
 
+## Kobo Cover Pusher
+
+Writes the covers from your calibre library straight into the thumbnail cache
+of a connected Kobo, without resending the book files — so a cover change no
+longer costs you your reading position, bookmarks and annotations.
+
+A Kobo never reads the cover out of the EPUB: it shows thumbnails it generated
+once, which is why a new cover in calibre changes nothing on the device until
+something rewrites them.
+
+**[Documentation and installation →](kobo-cover-pusher/)**
+
 ---
 
 Requires calibre 6 or later. Tested on calibre 9.13 under Windows 11.

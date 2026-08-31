@@ -176,3 +176,52 @@ Add the case to `POSITIVE` in `tools/test_parser.py`, and add anything the new
 rule must **not** match to `NEGATIVE`. The negative list matters more than the
 positive one: a plugin that invents a series is worse than one that misses a
 few.
+
+
+---
+
+# Kobo Cover Pusher
+
+## Architecture
+
+| File | Role | Depends on |
+|---|---|---|
+| `__init__.py` | plugin declaration | `calibre.customize` |
+| `action.py` | toolbar, menu, the push loop | calibre + Qt |
+| `config.py` | persistent settings + configuration dialog | calibre + Qt |
+| `pusher.py` | finding the device, paths, calling the driver | calibre (device driver) |
+| `matching.py` | pairing library books with device books | nothing |
+
+## What it leans on
+
+The Kobo thumbnail format, the sizes per model and the ImageId lookup are
+**not** reimplemented here. `pusher.push_cover` writes the calibre cover to a
+temporary file and hands it to the KoboTouch driver:
+
+```python
+device._upload_cover(dirname, basename_without_extension, metadata, filepath,
+                     uploadgrayscale, dithered_covers=..., keep_cover_aspect=...,
+                     letterbox_fs_covers=..., png_covers=..., letterbox_color=...)
+```
+
+`_upload_cover` rather than the public `upload_cover`, because the public one
+returns immediately when the driver's *Upload covers* option is off — and
+pushing covers on demand is the whole point. That is the one calibre internal
+this plugin depends on; `push_cover` checks it exists and reports plainly if a
+future calibre drops it.
+
+`metadata` needs a `cover` attribute holding a path to an image file. The
+driver derives the ContentID from `filepath` and looks the ImageId up in the
+device's `KoboReader.sqlite`.
+
+## Tools
+
+```bash
+python tools/test_matching.py     # 11 matching cases, no calibre, no device
+calibre-debug tools/gui_smoke.py  # dialog + the no-device error paths
+calibre-debug tools/make_icon.py  # regenerates the icon
+```
+
+Everything except the final write to the device can be exercised without a
+Kobo: `matching.py` is duck typed, so the device books are stand-in objects in
+the tests.
