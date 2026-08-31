@@ -6,11 +6,16 @@ ZIP installable par plugin, un script de build commun.
 Développés et testés sur **calibre 9.13 / Qt 6 / Python 3.14 / Pillow 12**,
 sous Windows 11. Compatibles calibre 6 et supérieur.
 
+![Les quatre presets de Stylish Cover Generator](stylish-cover-generator/docs/presets-comparison.jpg)
+
+<sub>La même illustration et les mêmes métadonnées passées dans les quatre
+presets de *Stylish Cover Generator*, sans aucun réglage manuel.</sub>
+
 ## Plugins
 
 | Plugin | Version | Description |
 |---|---|---|
-| [stylish-cover-generator](stylish-cover-generator/) | 1.0.0 | Fabrique de vraies couvertures de webnovel / dark fantasy à partir de l'illustration existante du livre et de ses métadonnées. Quatre presets, typographie automatique, contraste automatique, support CJK complet. |
+| [stylish-cover-generator](stylish-cover-generator/) | 1.0.1 | Fabrique de vraies couvertures de webnovel / dark fantasy à partir de l'illustration existante du livre et de ses métadonnées. Quatre presets, typographie automatique, contraste automatique, support CJK complet. |
 
 ## Installation
 

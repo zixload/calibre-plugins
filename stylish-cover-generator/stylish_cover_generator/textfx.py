@@ -232,10 +232,10 @@ def fit_text(text, measurer, role, max_width, max_lines=3, max_size=200,
 
     chunks = chunks_of(text)
 
-    def fits(size, line_limit):
+    def fits(size, line_limit, explode):
         tracking_px = tracking * size
         usable = explode_long(chunks, measurer, role, size, tracking_px,
-                              max_width)
+                              max_width) if explode else chunks
         lines = greedy_wrap(usable, measurer, role, size, tracking_px, max_width)
         if len(lines) > line_limit:
             return None
@@ -251,12 +251,12 @@ def fit_text(text, measurer, role, max_width, max_lines=3, max_size=200,
                 return None
         return [_join(ln) for ln in lines]
 
-    def search(line_limit, floor_size):
+    def search(line_limit, floor_size, explode=False):
         lo, hi = int(floor_size), int(max_size)
         found, found_size = None, lo
         while lo <= hi:
             mid = (lo + hi) // 2
-            result = fits(mid, line_limit)
+            result = fits(mid, line_limit, explode)
             if result is not None:
                 found, found_size = result, mid
                 lo = mid + 1
@@ -264,13 +264,21 @@ def fit_text(text, measurer, role, max_width, max_lines=3, max_size=200,
                 hi = mid - 1
         return found, found_size
 
+    # Words are never broken while a smaller size would keep them whole:
+    # shrink first, then allow more lines, and only split inside a word when
+    # the word cannot fit on a line at any size.
     best, best_size = search(max_lines, min_size)
     if best is None:
-        # A title that cannot fit must never lose words: relax the line count
-        # and the minimum size first, in that order.
         for line_limit, floor in ((max_lines + 2, min_size * 0.8),
                                   (MAX_FALLBACK_LINES, min_size * 0.55)):
             best, best_size = search(line_limit, max(6, floor))
+            if best is not None:
+                break
+    if best is None:
+        # unbreakable content (a 60 character "word", a URL): split characters
+        for line_limit, floor in ((max_lines, min_size),
+                                  (MAX_FALLBACK_LINES, max(6, min_size * 0.55))):
+            best, best_size = search(line_limit, floor, explode=True)
             if best is not None:
                 break
     if best is None:

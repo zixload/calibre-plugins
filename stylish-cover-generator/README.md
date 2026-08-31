@@ -7,6 +7,39 @@ image de votre disque) et de ses métadonnées.
 Testé sur **calibre 9.13 / Qt 6 / Python 3.14 / Pillow 12** sous Windows 11.
 Compatible calibre 6 et supérieur.
 
+## Exemples
+
+![Les quatre presets](docs/presets-comparison.jpg)
+
+<sub>Une seule illustration, les mêmes métadonnées, les quatre presets aux
+réglages par défaut. `asian_fantasy` n'affiche sa colonne verticale que si un
+titre asiatique est renseigné, sans quoi sa composition reste proche de
+`dark_fantasy`.</sub>
+
+<table>
+<tr>
+<td width="45%"><img src="docs/cover-dark-fantasy-hugo.png" alt="Le dernier jour d'un condamne, preset Dark Fantasy"></td>
+<td>
+
+Preset `dark_fantasy` sur un fond clair et texturé : le contraste automatique
+a détecté la luminosité derrière le bloc de texte et renforcé l'ombre et le
+dégradé, sans assombrir l'illustration elle-même.
+
+Le titre s'est réparti tout seul sur trois lignes équilibrées, le filet doré
+sépare le titre de l'auteur.
+
+</td>
+</tr>
+</table>
+
+![La fenetre d'apercu](docs/preview-dialog.png)
+
+<sub>La fenêtre d'aperçu : rendu instantané à gauche, métadonnées et réglages
+rapides à droite. Ici les intensités d'effets ont été poussées à la main
+(ombre 140 %, dégradé 166 %) avant application.</sub>
+
+## Les presets
+
 | Preset | Rendu |
 |---|---|
 | `dark_fantasy` | illustration dominante, titre serif dans le tiers inférieur, filet doré, ombre douce (type *Reverend Insanity*) |
