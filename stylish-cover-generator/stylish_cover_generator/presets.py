@@ -24,9 +24,8 @@ import copy
 DARK_FANTASY = {
     'id': 'dark_fantasy',
     'label': 'Dark Fantasy',
-    'description': 'Illustration dominante, titre serif dans le tiers inferieur, '
-                   'filet dore, ombre douce. Inspire des couvertures type '
-                   'Reverend Insanity.',
+    'description': 'Artwork dominant, serif title in the lower third, gold '
+                   'rule, soft shadow. The Reverend Insanity territory.',
     'font_roles': {'title': 'serif', 'author': 'sans'},
     'image': {'mode': 'fill', 'focus': 'upper', 'zoom': 1.0, 'darken': 0.06,
               'saturation': 0.97, 'contrast': 1.06, 'vignette': 0.38},
@@ -65,8 +64,8 @@ DARK_FANTASY = {
 SHADOW_SLAVE = {
     'id': 'shadow_slave',
     'label': 'Shadow Slave',
-    'description': 'Titre enorme en haut, typo bold tres lisible, contour leger '
-                   'et drop shadow prononcee, auteur en bas.',
+    'description': 'Huge title at the top, very legible bold type, light '
+                   'outline and pronounced drop shadow, author at the bottom.',
     'font_roles': {'title': 'display', 'author': 'sans_bold'},
     'image': {'mode': 'fill', 'focus': 'center', 'zoom': 1.0, 'darken': 0.05,
               'saturation': 1.02, 'contrast': 1.05, 'vignette': 0.26},
@@ -108,8 +107,9 @@ SHADOW_SLAVE = {
 ASIAN_FANTASY = {
     'id': 'asian_fantasy',
     'label': 'Asian Fantasy',
-    'description': 'Titre latin principal, caracteres chinois/coreens en '
-                   'decoration verticale sur le cote. Rendu wuxia / xianxia.',
+    'description': 'Latin title as the lead, chinese or korean characters as '
+                   'a vertical decoration on the side. Wuxia / xianxia look. '
+                   'The vertical column needs an Asian title to be set.',
     'font_roles': {'title': 'serif', 'author': 'sans'},
     'image': {'mode': 'fill', 'focus': 'center', 'zoom': 1.0, 'darken': 0.04,
               'saturation': 1.03, 'contrast': 1.04, 'vignette': 0.32},
@@ -150,8 +150,8 @@ ASIAN_FANTASY = {
 MINIMAL = {
     'id': 'minimal',
     'label': 'Minimal',
-    'description': 'Priorite absolue a l illustration: petit titre propre, '
-                   'auteur, quasiment aucun effet.',
+    'description': 'Absolute priority to the illustration: small clean '
+                   'title, author, almost no effects.',
     'font_roles': {'title': 'sans', 'author': 'sans'},
     'image': {'mode': 'fill', 'focus': 'center', 'zoom': 1.0, 'darken': 0.0,
               'saturation': 1.0, 'contrast': 1.0, 'vignette': 0.10},
