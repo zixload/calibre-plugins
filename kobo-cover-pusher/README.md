@@ -48,7 +48,31 @@ skipped. If you would rather only ever match on the calibre identifier, there
 is a setting for that; it is safer, but it skips books that reached the Kobo
 by any route other than calibre.
 
+## And the metadata? (title, author, tags, description)
+
+This plugin writes **covers**. The rest of the metadata is handled by calibre
+itself, and the switch is off by default, which is why a Kobo keeps showing
+the old author after you fixed it in calibre.
+
+With the Kobo connected: **Preferences → Plugins → Device interface →
+KoboTouch → Customize**, tab **"Metadata, on device && advanced"**:
+
+- **"Update metadata on the device"** — the master switch for the group;
+- **"Update metadata on Book Details pages"** — the one that actually pushes
+  title, author, publisher and description into the device database. **This is
+  the one that ships off**;
+- **"Set series information"** — series and volume number in the Kobo book
+  lists, which the device cannot read from a sideloaded file on its own.
+
+calibre then updates the device database **when the device connects**, so
+reconnect the Kobo once and let it work. The books are not resent.
+
+Order that works: fix everything in calibre, tick the options above, push the
+covers with this plugin, eject, reconnect once.
+
 ## Settings
+
+![The settings](docs/settings.png)
 
 By default the plugin reuses the Kobo driver's own cover options (aspect
 ratio, greyscale, PNG, dithering), so what it writes matches what calibre

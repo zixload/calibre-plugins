@@ -103,6 +103,17 @@ botched batch is undone with **Restore previous cover** on the same selection
 
 Budget roughly half a second per cover.
 
+## Settings
+
+![Style settings](docs/settings-style.png)
+
+The **Style** tab picks the preset and lets you nudge the title position and
+sizes; **Effects** holds the four intensity sliders and the automatic contrast
+switch, every value being a multiplier on what the preset was designed with —
+100 % is the preset as drawn, 0 % disables the effect.
+
+![Effect settings](docs/settings-effects.png)
+
 ## Fonts
 
 No font ships with the plugin, for licensing reasons. By default it picks a

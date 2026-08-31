@@ -50,6 +50,36 @@ Two spellings of the same series are unified before anything is written
 calibre merges series names case insensitively anyway. The spelling of volume 1
 is the one kept.
 
+## Settings
+
+![The settings](docs/settings.png)
+
+| Option | Default | Effect |
+|---|---|---|
+| Rewrite the title once the series is extracted | on | off keeps titles as they are and only fills the series |
+| Never overwrite a series already filled in | on | protects series you set by hand |
+| Treat a bare trailing number as a volume number | **off** | risky: turns "Dune 2" into a volume, but also mangles "Fahrenheit 451" |
+| Swap author names written "Last, First" | off | `Hugo, Victor` becomes `Victor Hugo`, leaving `Smith, Jr.` alone |
+| Normalise whitespace and punctuation spacing | on | collapses double spaces, fixes ` ,` |
+| Remember previous values | on | required for **Undo last tidy** |
+
+## Why not just download the metadata?
+
+Because no online source knows how your files are organised.
+
+Asked about *Vagabond*, AniList, MangaDex and Kitsu all answer with the work
+as a whole: one manga, no volume. None of them returns a series **and** a
+volume number, verified on *Vagabond*, *86—EIGHTY-SIX* and *La guerre du
+pavot* — all three came back with an empty series field.
+
+That information exists in exactly one place: your own titles, because you are
+the one who split the books into files.
+
+**So run this plugin before downloading metadata**, not after. A metadata
+download rewrites the title, so `Vagabond part 02` becomes `Vagabond` and the
+volume number is gone for good. Extract it first, and the download then fills
+authors, tags and description around a series that is already correct.
+
 ## Installation
 
 1. Download `metadata-tidy.zip` from the
@@ -68,17 +98,6 @@ Select some books, then use the **Metadata Tidy** toolbar button.
 | **Undo last tidy** | puts back the titles, series and authors from the last run, even after a calibre restart |
 | **Create the #original_title column…** | adds a text column for the original chinese, korean or japanese title — this is the column [Stylish Cover Generator](../stylish-cover-generator/) reads for its Asian subtitle |
 | **Settings…** | which fixes are proposed |
-
-## Settings
-
-| Option | Default | Effect |
-|---|---|---|
-| Rewrite the title once the series is extracted | on | off keeps titles as they are and only fills the series |
-| Never overwrite a series already filled in | on | protects series you set by hand |
-| Treat a bare trailing number as a volume number | **off** | risky: turns "Dune 2" into a volume, but also mangles "Fahrenheit 451" |
-| Swap author names written "Last, First" | off | `Hugo, Victor` → `Victor Hugo`, leaving `Smith, Jr.` alone |
-| Normalise whitespace and punctuation spacing | on | collapses double spaces, fixes ` ,` |
-| Remember previous values | on | required for **Undo last tidy** |
 
 ## Where things are stored
 

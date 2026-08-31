@@ -74,24 +74,44 @@ nothing in common with what you searched is discarded.
 
 ## Usage
 
-1. Install, then restart calibre.
-2. **Preferences → Metadata download**, and make sure *Cross-Check* is ticked.
+Cross-Check is a **metadata source**, not a toolbar button: it will never add
+an icon. It works inside the download you already use.
+
+1. Install it, then **restart calibre**.
+2. **Preferences → Sharing → Metadata download**: *Cross-Check* appears in the
+   source list, ticked. In the plugin list of Preferences it sits under
+   *Metadata source*, not under *User interface action*.
 3. Select books, then **Edit metadata → Download metadata**.
 
-calibre queries every enabled source, Cross-Check included, and shows you the
-results to compare and pick as usual. Nothing is written to your library
-without you choosing it.
+What happens next depends on the selection:
+
+- **one book**: calibre lists the matches it found, you pick one, you see the
+  merged result, you validate. Nothing is written before that;
+- **several books**: it runs as a background job, and the dialog at the end
+  offers **Review downloaded metadata**. Use it — that is where you catch a
+  web novel that came back as a cookbook.
+
+On the same preferences screen, two settings are worth changing:
+
+- **untick Rating**: what sources return is a public average, not your
+  opinion, and it overwrites yours;
+- **untick "Prefer fewer tags"** if you want the merged tags. Cross-Check
+  unions the tags of every source, and that box makes calibre keep only a few.
+
+A full search takes about **3 seconds** across five APIs.
+
+## Settings
+
+![The options](docs/config.png)
+
+**Preferences → Metadata download → Cross-Check → Configure selected source**:
+tick the APIs to query, cap the number of tags, and set how similar two titles
+must be to count as the same work.
 
 The original title appears at the top of the description, so it can be copied
 into a column such as `#original_title` — which
 [Stylish Cover Generator](../stylish-cover-generator/) reads for its Asian
 subtitle.
-
-## Settings
-
-**Preferences → Metadata download → Cross-Check → Configure**: tick the
-sources you want, cap the number of tags, and adjust how similar two titles
-must be to count as the same work.
 
 ## Licence
 

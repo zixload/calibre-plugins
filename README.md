@@ -57,6 +57,23 @@ work, its author and its original title 诡秘之主, confirmed by three sources
 
 **[Documentation and installation →](metadata-crosscheck/)**
 
+## Using them together
+
+The four plugins cover four different steps, and **the order matters**.
+
+| # | Step | Plugin | Why here |
+|---|---|---|---|
+| 1 | Extract the series and volume number from titles | **Metadata Tidy** | must run **first**: downloading metadata rewrites titles, and `Vagabond part 02` becomes `Vagabond`, taking the volume number with it |
+| 2 | Fill authors, tags, description, publisher, year, cover | **Cross-Check**, through calibre's *Download metadata* | no online source knows how your files are split into volumes, which is why step 1 comes before |
+| 3 | Build the covers | **Stylish Cover Generator** | now that the series is filled in, presets can print it |
+| 4 | Refresh the covers on the Kobo | **Kobo Cover Pusher** | writes the thumbnails without resending the books |
+
+The two metadata plugins are complementary, not alternatives: Cross-Check
+never returns a series or a volume number for manga and light novels — AniList
+treats a whole manga as one work and cannot know that your file is volume 2 of
+3. That information only exists in your own titles, which is what Metadata
+Tidy reads.
+
 ---
 
 Requires calibre 6 or later. Tested on calibre 9.13 under Windows 11.
