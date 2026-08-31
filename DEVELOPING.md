@@ -225,3 +225,52 @@ calibre-debug tools/make_icon.py  # regenerates the icon
 Everything except the final write to the device can be exercised without a
 Kobo: `matching.py` is duck typed, so the device books are stand-in objects in
 the tests.
+
+
+---
+
+# Cross-Check
+
+Unlike the other three, this is a **metadata source**, not an interface
+action: the class in `__init__.py` subclasses
+`calibre.ebooks.metadata.sources.base.Source` and is the plugin itself, with
+no `actual_plugin` indirection.
+
+| File | Role | Depends on |
+|---|---|---|
+| `__init__.py` | the Source: options, `identify`, `download_cover` | calibre |
+| `providers.py` | one adapter per API, each returning Candidates | nothing |
+| `candidates.py` | clustering, voting, merging, noise filtering | nothing |
+
+Providers take a `fetch(url, data=None, headers=None)` callable rather than
+importing anything, so the plugin passes a urllib fetcher and the tests pass
+their own. A provider that fails, times out or changes shape returns nothing
+and logs; it never takes the search down with it.
+
+## Adding a source
+
+Write a function `myapi(fetch, title, authors, log) -> [Candidate]` in
+`providers.py`, then add `('mykey', 'Label', myapi, 'manga'|'book', enabled)`
+to `PROVIDERS` and a matching `Option('use_mykey', 'bool', ...)` in
+`__init__.py`. Keyless APIs only.
+
+## Tools
+
+```bash
+python tools/test_merge.py            # 13 merging rules, no network
+python tools/live_probe.py            # hits the real APIs on a sample
+python tools/live_probe.py "a title"  # or on one title
+```
+
+`live_probe.py` loads `candidates.py` and `providers.py` straight from their
+paths, so it runs on a plain python with no calibre installed.
+
+## Notes on the APIs
+
+- Google Books is excluded on purpose: keyless calls answer HTTP 429 from a
+  shared anonymous quota.
+- Kitsu speaks JSON:API and answers HTTP 406 unless the request asks for
+  `application/vnd.api+json`.
+- Jikan proxies MyAnimeList and returns HTTP 504 whenever MAL is unwell, which
+  is why it ships disabled.
+- NovelUpdates is not usable: it answers HTTP 403 behind Cloudflare.

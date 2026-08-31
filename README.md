@@ -44,6 +44,19 @@ something rewrites them.
 
 **[Documentation and installation →](kobo-cover-pusher/)**
 
+## Cross-Check
+
+A metadata source that queries several free APIs at once — AniList, MangaDex,
+Kitsu, Open Library and the BnF — compares their answers, and feeds the result
+into calibre's usual *Download metadata* dialog. No API key needed.
+
+It exists because the sources calibre ships answer well for published books
+and badly for manga, light novels and web novels: asked about *Lord of the
+Mysteries*, Amazon offers a diet cookbook, while Cross-Check returns the right
+work, its author and its original title 诡秘之主, confirmed by three sources.
+
+**[Documentation and installation →](metadata-crosscheck/)**
+
 ---
 
 Requires calibre 6 or later. Tested on calibre 9.13 under Windows 11.
