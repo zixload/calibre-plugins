@@ -130,3 +130,49 @@ it really covers, with no external dependency. If a single font of the CJK
 chain covers all of the Asian text it is used throughout — mixing two faces
 inside one word looks wrong. Otherwise substitution happens character by
 character down the chain.
+
+
+---
+
+# Metadata Tidy
+
+## Architecture
+
+| File | Role | Depends on |
+|---|---|---|
+| `__init__.py` | plugin declaration | `calibre.customize` |
+| `action.py` | toolbar, menu, selection, undo | calibre + Qt |
+| `config.py` | persistent settings + configuration dialog | calibre + Qt |
+| `widgets.py` | the preview table | Qt |
+| `backup.py` | undo store | calibre (config path) |
+| `tidy.py` | library metadata to proposals, and back | calibre (db only) |
+| `parser.py` | the title rules, the whole brain | nothing |
+
+`parser.py` has no imports beyond `re`, and `tidy.py` needs a database object
+but never the GUI, which is what lets both be tested from a script.
+
+## Tools
+
+```bash
+python tools/test_parser.py                     # 41 rule cases, no calibre needed
+python tools/test_parser.py --library "C:/..."  # dry run over a real library
+calibre-debug tools/library_roundtrip.py        # throwaway library: propose,
+                                                # apply, verify, undo, verify
+calibre-debug tools/gui_smoke.py                # builds the dialogs
+calibre-debug tools/make_icon.py                # regenerates the icon
+```
+
+`test_parser.py` loads `parser.py` straight from its path, so it runs on a
+plain python with no calibre installed.
+
+## Adding a title rule
+
+Rules live in `PATTERNS` in `parser.py`, tried in order. Each regex must name
+a `series` group and a `num` group, and may name a `sub` group for the
+volume's own subtitle. The resulting title is the subtitle when there is one,
+otherwise the series name.
+
+Add the case to `POSITIVE` in `tools/test_parser.py`, and add anything the new
+rule must **not** match to `NEGATIVE`. The negative list matters more than the
+positive one: a plugin that invents a series is worse than one that misses a
+few.

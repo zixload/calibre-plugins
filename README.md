@@ -19,6 +19,19 @@ previous cover.
 
 **[Documentation and installation →](stylish-cover-generator/)**
 
+## Metadata Tidy
+
+Pulls the series name and the volume number out of titles that carry them
+(`La guerre du pavot T1`, `Vagabond part 02`, `Vol. 1: Subtitle`) and fills the
+Series and Series index fields, so sorting, grouping and cover generation have
+something to work with.
+
+Every change is shown in a preview table before anything is written, rows can
+be unticked or corrected by hand, and one menu entry undoes the whole run. It
+refuses to guess: a title without a volume marker is left strictly alone.
+
+**[Documentation and installation →](metadata-tidy/)**
+
 ---
 
 Requires calibre 6 or later. Tested on calibre 9.13 under Windows 11.
