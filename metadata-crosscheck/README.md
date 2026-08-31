@@ -81,7 +81,14 @@ an icon. It works inside the download you already use.
 2. **Preferences → Sharing → Metadata download**: *Cross-Check* appears in the
    source list, ticked. In the plugin list of Preferences it sits under
    *Metadata source*, not under *User interface action*.
-3. Select books, then **Edit metadata → Download metadata**.
+3. Select books, then **Edit metadata → Download metadata and covers**
+   (`Ctrl+D`).
+
+![Where to start the download](docs/usage-menu.jpg)
+
+<sub>The entry sits in the dropdown next to the *Edit metadata* button. The
+three toolbar buttons on the right — Stylish Covers, Metadata Tidy, Kobo
+Covers — are the other plugins of this repository.</sub>
 
 What happens next depends on the selection:
 
@@ -90,6 +97,15 @@ What happens next depends on the selection:
 - **several books**: it runs as a background job, and the dialog at the end
   offers **Review downloaded metadata**. Use it — that is where you catch a
   web novel that came back as a cookbook.
+
+You can also work book by book: **Edit metadata individually** has its own
+**Download metadata** button at the bottom, which fills the form in front of
+you so you see exactly what changes before clicking OK.
+
+![Downloading for a single book](docs/usage-single-book.jpg)
+
+<sub>A light novel filled in by the download: series and number, tags, ISBN,
+publisher, publication date and the full synopsis. The cover came with it.</sub>
 
 On the same preferences screen, two settings are worth changing:
 
