@@ -80,7 +80,6 @@ Select one or more books, then use the **Stylish Covers** toolbar button.
 | **Generate stylish covers** | generates straight away with your saved settings, for every selected book, with a cancellable progress bar |
 | **Preview…** | opens the preview window (also what a plain click on the button does) |
 | **Generate from a chosen image…** | asks for an image on disk and uses it as the artwork instead of the current cover |
-| **Apply my badge to the existing covers** | stamps your badge without regenerating the artwork |
 | **Push covers to the Kobo** | refreshes the thumbnails on a connected device, without resending the books |
 | **Kobo device information…** | model, firmware, paths and expected thumbnail sizes |
 | **Restore previous cover** | puts back the cover replaced by the last generation |
@@ -119,55 +118,6 @@ switch, every value being a multiplier on what the preset was designed with —
 100 % is the preset as drawn, 0 % disables the effect.
 
 ![Effect settings](docs/settings-effects.png)
-
-## Your own badge
-
-![The four badges](docs/badges.jpg)
-
-<sub>The same cover with each of the four badges: Vine, Mark, Seal, Ribbon.</sub>
-
-A badge is your library's mark, not the book's: a name in the margin, a seal
-in a corner. It is drawn last, in the margins the presets keep free, so it
-never collides with the title or the author.
-
-![The Badge tab](docs/settings-badge.png)
-
-**Settings → Badge**: tick it, choose one of the four, and type your text —
-anything, in any script, `루카의 서재` as well as `Luca's library`. Size,
-opacity, colour and the flowers are all adjustable.
-
-Placement is automatic by default: the plugin measures how busy each margin is
-and picks the calmer one. It measures detail, so it **cannot recognise
-lettering already painted into the artwork** — when a cover already carries
-vertical credits, force the side by hand.
-
-**Apply my badge to the existing covers** stamps the badge without
-regenerating anything: the artwork, the title and the author stay exactly as
-they are. Use this rather than regenerating, because regenerating from an
-already generated cover stacks a second layer of typography onto the first.
-
-![The badge preview](docs/badge-preview.png)
-
-It opens on your real covers, badge already drawn, with the settings that
-matter next to it. Walk through the selection with `<` and `>`, then **Apply**
-for the one on screen or **Apply to all**. Nothing is written until you do.
-
-### Changed your mind?
-
-The cover you replace is backed up first, exactly like a generated one, so
-**Restore previous cover** on the same books removes the badge and puts back
-what was there — even after a calibre restart. **Restore original cover** goes
-further back, to the cover the book had before this plugin ever touched it.
-
-### The sleep screen
-
-A Kobo shows the cover of the book you are reading on its **sleep screen and
-its powered off screen** — that is the `Show book covers full screen` setting
-on the device, on by default. So there is no separate sleep screen to design:
-the badge you put on the cover is what you see when the device sleeps.
-
-Nothing is automatic. Once the badge is configured, apply it, push the covers,
-then eject and let the device rescan; the sleep screen follows.
 
 ## Sending covers to a Kobo
 

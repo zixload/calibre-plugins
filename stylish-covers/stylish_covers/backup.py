@@ -38,7 +38,9 @@ def _safe(part):
 
 # "prev" is the cover replaced by the last generation, "orig" is the very
 # first cover this plugin ever replaced for that book and is never overwritten.
-KINDS = {'prev': '.bak', 'orig': '.orig'}
+# 'art' is the illustration a cover was composed from, when the user
+# supplied one: the only source that is guaranteed to carry no title
+KINDS = {'prev': '.bak', 'orig': '.orig', 'art': '.art'}
 
 
 def backup_path(library_id, book_id, kind='prev'):
@@ -97,7 +99,7 @@ def prune(max_files=MAX_BACKUPS):
     """Keep the backup folder bounded, dropping the oldest entries first."""
     try:
         entries = [os.path.join(backup_dir(), n) for n in os.listdir(backup_dir())
-                   if n.endswith('.bak')]  # originals are never pruned
+                   if n.endswith('.bak')]  # originals and artwork are kept
     except OSError:
         return
     if len(entries) <= max_files:

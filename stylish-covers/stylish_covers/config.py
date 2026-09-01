@@ -17,7 +17,6 @@ from qt.core import (QCheckBox, QComboBox, QGroupBox, QHBoxLayout,
                      QInputDialog, QLabel, QLineEdit, QMessageBox, QPushButton,
                      QSpinBox, QTabWidget, QVBoxLayout, QWidget)
 
-from . import badges as badges_mod
 from . import presets as presets_mod
 from .fonts import FontBook
 from .generator import SETTINGS_DEFAULTS
@@ -96,10 +95,7 @@ STYLE_KEYS = ('preset', 'title_position', 'author_position', 'title_size_scale',
               'asian_size_scale')
 
 
-BADGE_PLACEHOLDER = '\uB8E8\uCE74\uC758 \uC11C\uC7AC'
-COLOUR_PLACEHOLDER = "empty = the badge's own colour"
-BADGE_NOTE = "The badge is your library's mark, not the book's: it is drawn last, in the margins the presets keep free, so it never collides with the title or the author. Automatic placement measures how busy each margin is, but it cannot recognise lettering already painted into the artwork - force a side when that happens."
-KOBO_NOTE = ('Covers are written straight into the device thumbnail cache, so the book files are never resent and your reading position, bookmarks and annotations are untouched. A Kobo shows the cover of the book you are reading on its sleep screen, which is where the badge shows up.')
+KOBO_NOTE = ('Covers are written straight into the device thumbnail cache, so the book files are never resent and your reading position, bookmarks and annotations are untouched.')
 
 
 class ConfigWidget(QWidget):
@@ -116,7 +112,6 @@ class ConfigWidget(QWidget):
         self.tabs.addTab(self._fonts_tab(), 'Fonts')
         self.tabs.addTab(self._effects_tab(), 'Effects')
         self.tabs.addTab(self._asian_tab(), 'Asian title')
-        self.tabs.addTab(self._badge_tab(), 'Badge')
         self.tabs.addTab(self._kobo_tab(), 'Kobo')
         self.tabs.addTab(self._metadata_tab(), 'Metadata')
         self._load()
@@ -298,51 +293,6 @@ class ConfigWidget(QWidget):
         form.addRow('', note)
         return page
 
-    def _badge_tab(self):
-        page = QWidget(self)
-        form = form_layout(page)
-        self.badge_check = QCheckBox('Stamp my badge on the covers', page)
-        form.addRow('', self.badge_check)
-
-        self.badge_preset = combo(page, badges_mod.badge_choices(
-            self.settings.get('user_badges')))
-        self.badge_preset.currentIndexChanged.connect(self._update_badge_help)
-        form.addRow('Badge:', self.badge_preset)
-        self.badge_help = QLabel('', page)
-        self.badge_help.setWordWrap(True)
-        form.addRow('', self.badge_help)
-
-        self.badge_text = QLineEdit(page)
-        self.badge_text.setPlaceholderText(BADGE_PLACEHOLDER)
-        form.addRow('Text:', self.badge_text)
-
-        self.badge_side = combo(page, [
-            ('auto', 'Automatic - the quietest side'),
-            ('left', 'Left margin'), ('right', 'Right margin'),
-            ('tl', 'Top left corner'), ('tr', 'Top right corner'),
-            ('bl', 'Bottom left corner'), ('br', 'Bottom right corner')])
-        form.addRow('Position:', self.badge_side)
-
-        self.badge_size = IntensitySlider(page, 40, 200)
-        form.addRow('Size:', self.badge_size)
-        self.badge_opacity = IntensitySlider(page, 20, 100)
-        form.addRow('Opacity:', self.badge_opacity)
-
-        self.badge_color = QLineEdit(page)
-        self.badge_color.setPlaceholderText(COLOUR_PLACEHOLDER)
-        form.addRow('Colour:', self.badge_color)
-
-        self.badge_ornament = QCheckBox('Draw the flowers', page)
-        form.addRow('', self.badge_ornament)
-        self.badge_scrim = QCheckBox(
-            'Darken behind the badge so it stays readable', page)
-        form.addRow('', self.badge_scrim)
-
-        note = QLabel(BADGE_NOTE, page)
-        note.setWordWrap(True)
-        form.addRow('', note)
-        return page
-
     def _kobo_tab(self):
         page = QWidget(self)
         outer = QVBoxLayout(page)
@@ -383,11 +333,6 @@ class ConfigWidget(QWidget):
 
     def _sync_kobo(self, *args):
         self.kobo_box.setEnabled(not self.kobo_use_driver.isChecked())
-
-    def _update_badge_help(self):
-        spec = badges_mod.get_badge(combo_value(self.badge_preset),
-                                    self.settings.get('user_badges'))
-        self.badge_help.setText(spec.get('description', ''))
 
     def _metadata_tab(self):
         page = QWidget(self)
@@ -532,17 +477,6 @@ class ConfigWidget(QWidget):
         self._set_combo(self.asian_mode, s.get('asian_mode', 'auto'))
         self.asian_size.set_value(s.get('asian_size_scale', 1.0))
 
-        self.badge_check.setChecked(bool(s.get('badge_enabled')))
-        self._set_combo(self.badge_preset, s.get('badge_preset'))
-        self.badge_text.setText(s.get('badge_text', ''))
-        self._set_combo(self.badge_side, s.get('badge_side', 'auto'))
-        self.badge_size.set_value(s.get('badge_size_scale', 1.0))
-        self.badge_opacity.set_value(s.get('badge_opacity', 1.0))
-        self.badge_color.setText(s.get('badge_color', ''))
-        self.badge_ornament.setChecked(bool(s.get('badge_ornament', True)))
-        self.badge_scrim.setChecked(bool(s.get('badge_scrim', True)))
-        self._update_badge_help()
-
         self.kobo_use_driver.setChecked(
             bool(s.get('kobo_use_driver_settings', True)))
         self.kobo_keep_aspect.setChecked(bool(s.get('kobo_keep_aspect', True)))
@@ -595,17 +529,6 @@ class ConfigWidget(QWidget):
             'asian_text': self.asian_text.text().strip(),
             'asian_mode': combo_value(self.asian_mode, 'auto'),
             'asian_size_scale': self.asian_size.value(),
-
-            'badge_enabled': self.badge_check.isChecked(),
-            'badge_preset': combo_value(self.badge_preset,
-                                        badges_mod.DEFAULT_BADGE),
-            'badge_text': self.badge_text.text().strip(),
-            'badge_side': combo_value(self.badge_side, 'auto'),
-            'badge_size_scale': self.badge_size.value(),
-            'badge_opacity': self.badge_opacity.value(),
-            'badge_color': self.badge_color.text().strip(),
-            'badge_ornament': self.badge_ornament.isChecked(),
-            'badge_scrim': self.badge_scrim.isChecked(),
 
             'kobo_use_driver_settings': self.kobo_use_driver.isChecked(),
             'kobo_keep_aspect': self.kobo_keep_aspect.isChecked(),

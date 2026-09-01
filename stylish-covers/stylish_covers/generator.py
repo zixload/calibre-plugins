@@ -12,7 +12,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from PIL import Image, ImageDraw
 
-from . import badges
 from . import imageops
 from . import presets as presets_mod
 from . import textfx
@@ -89,18 +88,6 @@ SETTINGS_DEFAULTS = {
     'mark_column': '',
     'mark_value': '',
 
-    # BADGE (your own mark, stamped in the margins the presets keep free)
-    'badge_enabled': False,
-    'badge_preset': badges.DEFAULT_BADGE,
-    'badge_text': '',
-    'badge_side': 'auto',          # auto|left|right, or tl|tr|bl|br for a seal
-    'badge_size_scale': 1.0,
-    'badge_opacity': 1.0,
-    'badge_color': '',             # empty = the badge's own colour
-    'badge_ornament': True,
-    'badge_scrim': True,
-    'user_badges': {},
-
     # KOBO (writing covers onto a connected device)
     'kobo_use_driver_settings': True,
     'kobo_keep_aspect': True,
@@ -112,6 +99,7 @@ SETTINGS_DEFAULTS = {
     'kobo_match_by_uuid_only': False,
 
     # BEHAVIOUR
+    'reuse_saved_artwork': True,
     'backup_covers': True,
     'image_library': '',
     'saved_styles': {},
@@ -523,7 +511,6 @@ def render_cover(image_source, book, settings=None, preset=None):
         block.paste_on(canvas, x, y, anchor)
 
     _draw_vertical_asian(canvas, layout, preset, settings)
-    badges.draw_badge(canvas, settings, layout.book_fonts, layout.measurer)
     return canvas.convert('RGB')
 
 
@@ -554,33 +541,35 @@ def _draw_vertical_asian(canvas, layout, preset, settings):
                        canvas.height * style.get('top', 0.09), 'center-top')
 
 
+def artwork_for(entry, settings=None):
+    """Which image to compose from, for one book.
+
+    Composing draws the title and the author onto the picture it is given, so
+    the picture must not already carry them.  A cover this plugin made does,
+    and so does a publisher's cover.  The only source known to be clean is an
+    illustration the user chose, which is remembered from one generation to
+    the next; everything else falls back to the current cover and gets a
+    warning in the preview.
+    """
+    settings = settings or {}
+    if entry.get('custom_image'):
+        return entry['custom_image']
+    if settings.get('reuse_saved_artwork', True) and entry.get('artwork'):
+        return entry['artwork']
+    return entry.get('image')
+
+
+def artwork_is_clean(entry, settings=None):
+    """True when the source is an illustration, not a finished cover."""
+    settings = settings or {}
+    return bool(entry.get('custom_image') or
+                (settings.get('reuse_saved_artwork', True) and
+                 entry.get('artwork')))
+
+
 def render_cover_bytes(image_source, book, settings=None, preset=None):
     """Render one cover and return encoded bytes ready for calibre."""
     settings = merged_settings(settings)
     img = render_cover(image_source, book, settings, preset)
-    return imageops.to_bytes(img, settings.get('output_format', 'JPEG'),
-                             settings.get('quality', 92))
-
-
-def stamp_badge(image_source, settings=None):
-    """Draw only the badge on an existing cover, keeping its own size.
-
-    Used by "Apply badge to existing covers": the artwork is not regenerated,
-    nothing is re-laid out, the mark is simply added.
-    """
-    settings = merged_settings(settings)
-    canvas = _ensure_rgba(imageops.load_image(image_source))
-    book_fonts = FontBook(
-        title=settings.get('font_title') or None,
-        author=settings.get('font_author') or None,
-        cjk=settings.get('font_cjk') or None)
-    measurer = textfx.Measurer(book_fonts)
-    badges.draw_badge(canvas, settings, book_fonts, measurer)
-    return canvas.convert('RGB')
-
-
-def stamp_badge_bytes(image_source, settings=None):
-    settings = merged_settings(settings)
-    img = stamp_badge(image_source, settings)
     return imageops.to_bytes(img, settings.get('output_format', 'JPEG'),
                              settings.get('quality', 92))

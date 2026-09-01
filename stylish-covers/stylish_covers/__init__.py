@@ -20,11 +20,11 @@ class StylishCovers(InterfaceActionBase):
     name = 'Stylish Covers'
     description = ('Compose book covers from the existing artwork and the '
                    'metadata: dark fantasy, webnovel, wuxia or minimal presets, '
-                   'automatic contrast, full CJK support, your own badge in the '
-                   'margin, and one click to refresh the covers on a Kobo.')
+                   'automatic contrast, full CJK support, and one click to '
+                   'refresh the covers on a connected Kobo.')
     supported_platforms = ['windows', 'osx', 'linux']
     author = 'huosh1'
-    version = (2, 0, 1)
+    version = (2, 1, 0)
     minimum_calibre_version = (6, 0, 0)
 
     actual_plugin = 'calibre_plugins.stylish_covers.action:StylishCoversAction'

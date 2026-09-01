@@ -20,9 +20,9 @@ from qt.core import (QApplication, QFileDialog, QIcon, QMenu, QProgressDialog,
 from . import backup
 from . import kobo_push
 from .config import get_settings, save_settings
-from .generator import BookInfo, render_cover_bytes, stamp_badge_bytes
+from .generator import BookInfo, artwork_for, render_cover_bytes
 from .kobo_matching import DeviceIndex
-from .widgets import IMAGE_FILTER, BadgePreviewDialog, PreviewDialog
+from .widgets import IMAGE_FILTER, PreviewDialog
 
 PLUGIN_NAME = 'Stylish Covers'
 PLUGIN_ICON = 'images/icon.png'
@@ -77,11 +77,6 @@ class StylishCoversAction(InterfaceAction):
             m, 'scg_custom_image', 'Generate from a chosen image...', icon=icon,
             description='Use any picture from your disk as the artwork',
             triggered=self.generate_from_image)
-        m.addSeparator()
-        self.create_menu_action(
-            m, 'scg_badge', 'Apply my badge to the existing covers',
-            description='Stamp the badge without regenerating the artwork',
-            triggered=self.stamp_badges)
         m.addSeparator()
         self.create_menu_action(
             m, 'scg_kobo_push', 'Push covers to the Kobo',
@@ -181,7 +176,11 @@ class StylishCoversAction(InterfaceAction):
             cover = db.cover(book_id)
         except Exception:
             cover = None
-        return {'book_id': book_id, 'info': info, 'image': cover}
+        # the illustration this cover was composed from, when the user chose
+        # one: the current cover cannot serve, it already carries a title
+        artwork = backup.load(self._library_id(), book_id, 'art') or None
+        return {'book_id': book_id, 'info': info, 'image': cover,
+                'artwork': artwork}
 
     # -- actions -----------------------------------------------------------
     def preview_covers(self, *args):
@@ -257,7 +256,8 @@ class StylishCoversAction(InterfaceAction):
                                   % (i + 1, len(entries), info.title or ''))
             QApplication.processEvents()
             book_id = entry['book_id']
-            source = entry.get('custom_image') or entry.get('image')
+            source = artwork_for(entry, settings)
+            self._remember_artwork(library_id, book_id, entry, source)
             try:
                 data = render_cover_bytes(source, info, settings)
             except Exception as err:
@@ -276,6 +276,28 @@ class StylishCoversAction(InterfaceAction):
         if done:
             self._refresh(done)
         self._report(done, failures)
+
+    def _remember_artwork(self, library_id, book_id, entry, source):
+        """Keep the illustration a cover was composed from, when it is one.
+
+        Only a picture the user supplied is worth keeping: the book's own
+        cover already carries a title, so re-composing from it would print a
+        second one.
+        """
+        if not entry.get('custom_image'):
+            return
+        try:
+            if isinstance(source, str) and os.path.isfile(source):
+                with open(source, 'rb') as f:
+                    data = f.read()
+            elif isinstance(source, (bytes, bytearray)):
+                data = bytes(source)
+            else:
+                return
+            backup.store(library_id, book_id, data, 'art')
+            entry['artwork'] = data
+        except Exception:
+            traceback.print_exc()
 
     def _apply(self, db, library_id, book_id, data, settings, previous_cover):
         if settings.get('backup_covers', True):
@@ -317,78 +339,6 @@ class StylishCoversAction(InterfaceAction):
             self.gui.status_bar.show_message(
                 '%d stylish cover(s) generated' % len(done), 4000)
 
-
-    # -- badge -------------------------------------------------------------
-    def stamp_badges(self, *args):
-        """Draw the badge on the covers as they are, without regenerating."""
-        book_ids = self.selected_ids()
-        if not book_ids:
-            return
-        settings = get_settings()
-        if not settings.get('badge_enabled') or not settings.get('badge_text'):
-            error_dialog(
-                self.gui, PLUGIN_NAME,
-                'No badge is configured yet. Open Settings, go to the Badge '
-                'tab, tick "Stamp my badge on the covers" and type the text '
-                'you want.', show=True)
-            return
-
-        db = self._db()
-        library_id = self._library_id()
-
-        entries = []
-        for book_id in book_ids:
-            try:
-                cover = db.cover(book_id)
-            except Exception:
-                cover = None
-            entries.append({'book_id': book_id, 'image': cover})
-        if not any(e['image'] for e in entries):
-            error_dialog(self.gui, PLUGIN_NAME,
-                         'None of the selected books have a cover to stamp.',
-                         show=True)
-            return
-
-        dialog = BadgePreviewDialog(self.gui, entries, settings)
-        if dialog.exec() != dialog.DialogCode.Accepted:
-            return
-        settings = dialog.settings
-        save_settings(settings)
-        chosen = dialog.selected_entries()
-        book_ids = [e['book_id'] for e in chosen if e.get('image')]
-        if not book_ids:
-            return
-
-        progress = QProgressDialog('Stamping the badge...', 'Cancel', 0,
-                                   len(book_ids), self.gui)
-        progress.setWindowTitle(PLUGIN_NAME)
-        progress.setWindowModality(Qt.WindowModality.ApplicationModal)
-        progress.setMinimumDuration(0)
-
-        done, failures = [], []
-        for position, book_id in enumerate(book_ids):
-            if progress.wasCanceled():
-                break
-            progress.setValue(position)
-            QApplication.processEvents()
-            try:
-                cover = db.cover(book_id)
-            except Exception:
-                cover = None
-            if not cover:
-                failures.append(('book %s' % book_id, 'no cover to stamp'))
-                continue
-            try:
-                data = stamp_badge_bytes(cover, settings)
-                self._apply(db, library_id, book_id, data, settings, cover)
-                done.append(book_id)
-            except Exception as err:
-                traceback.print_exc()
-                failures.append(('book %s' % book_id, str(err)))
-        progress.setValue(len(book_ids))
-        if done:
-            self._refresh(done)
-        self._report(done, failures)
 
     # -- kobo --------------------------------------------------------------
     def _kobo_options(self, settings):

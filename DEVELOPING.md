@@ -75,7 +75,6 @@ second knows Qt, and the third knows nothing but Pillow.
 | `backup.py` | cover backup and restore | calibre (config path) |
 | `generator.py` | render orchestration, layout, auto contrast | Pillow |
 | `presets.py` | preset data | — |
-| `badges.py` | the personal mark: ornaments, placement, drawing | Pillow |
 | `kobo_matching.py` | pairing library books with device books | nothing |
 | `kobo_push.py` | finding the device, paths, calling the driver | calibre (device driver) |
 | `textfx.py` | wrapping, size fitting, text effects, vertical text | Pillow |
