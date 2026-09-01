@@ -130,6 +130,8 @@ A badge is your library's mark, not the book's: a name in the margin, a seal
 in a corner. It is drawn last, in the margins the presets keep free, so it
 never collides with the title or the author.
 
+![The Badge tab](docs/settings-badge.png)
+
 **Settings → Badge**: tick it, choose one of the four, and type your text —
 anything, in any script, `루카의 서재` as well as `Luca's library`. Size,
 opacity, colour and the flowers are all adjustable.
@@ -144,8 +146,15 @@ regenerating anything: the artwork, the title and the author stay exactly as
 they are. Use this rather than regenerating, because regenerating from an
 already generated cover stacks a second layer of typography onto the first.
 
-A Kobo shows the cover of the book you are reading on its sleep screen, which
-is where the badge ends up.
+### The sleep screen
+
+A Kobo shows the cover of the book you are reading on its **sleep screen and
+its powered off screen** — that is the `Show book covers full screen` setting
+on the device, on by default. So there is no separate sleep screen to design:
+the badge you put on the cover is what you see when the device sleeps.
+
+Nothing is automatic. Once the badge is configured, apply it, push the covers,
+then eject and let the device rescan; the sleep screen follows.
 
 ## Sending covers to a Kobo
 
@@ -163,6 +172,8 @@ Books are paired with the copies on the device by calibre identifier first,
 then title and author ignoring case, accents and punctuation, then title alone
 when it is unique on the device. Two books sharing a title are never guessed
 at, they are reported as skipped.
+
+![The Kobo tab](docs/settings-kobo.png)
 
 **Kobo device information…** reports the model, the firmware, the paths and
 the exact thumbnail sizes your model expects — useful to know what resolution
