@@ -19,8 +19,9 @@ from qt.core import (QApplication, QCheckBox, QComboBox, QDialog,
                      QPushButton, QScrollArea, QSize, QSizePolicy, QSlider,
                      QSpinBox, Qt, QTimer, QToolButton, QVBoxLayout, QWidget)
 
+from . import badges as badges_mod
 from . import presets as presets_mod
-from .generator import merged_settings, render_cover
+from .generator import merged_settings, render_cover, stamp_badge
 
 IMAGE_FILTER = 'Images (*.jpg *.jpeg *.png *.webp *.bmp *.tif *.tiff)'
 FONT_FILTER = 'Fonts (*.ttf *.otf *.ttc *.otc)'
@@ -450,6 +451,199 @@ class PreviewDialog(QDialog):
 
     def _apply_all(self):
         self._harvest_entry()
+        self.collect_settings()
+        self.apply_to_all = True
+        self.accept()
+
+    def selected_entries(self):
+        return self.entries if self.apply_to_all else [self._current()]
+
+
+class BadgePreviewDialog(QDialog):
+    """See the badge on the real covers before stamping anything.
+
+    Unlike PreviewDialog this never regenerates the artwork: it draws the
+    badge onto the cover exactly as it is, which is what the menu entry does.
+    """
+
+    def __init__(self, parent, entries, settings):
+        QDialog.__init__(self, parent)
+        self.entries = entries
+        self.settings = merged_settings(settings)
+        self.settings['badge_enabled'] = True
+        self.index = 0
+        self.apply_to_all = False
+        self._timer = QTimer(self)
+        self._timer.setSingleShot(True)
+        self._timer.setInterval(180)
+        self._timer.timeout.connect(self.regenerate)
+
+        self.setWindowTitle('Stylish covers - badge preview')
+        self._build_ui()
+        self._load_settings_into_ui()
+        self._show_entry()
+
+    def _build_ui(self):
+        outer = QVBoxLayout(self)
+        body = QHBoxLayout()
+        outer.addLayout(body, 1)
+
+        left = QVBoxLayout()
+        self.preview_label = QLabel(self)
+        self.preview_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.preview_label.setFrameShape(QFrame.Shape.StyledPanel)
+        self.preview_label.setMinimumSize(QSize(PREVIEW_WIDTH,
+                                                int(PREVIEW_WIDTH * 1.5)))
+        left.addWidget(self.preview_label)
+        nav = QHBoxLayout()
+        self.prev_button = QPushButton('<', self)
+        self.prev_button.clicked.connect(lambda: self._step(-1))
+        self.next_button = QPushButton('>', self)
+        self.next_button.clicked.connect(lambda: self._step(1))
+        self.counter = QLabel('', self)
+        self.counter.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        nav.addWidget(self.prev_button)
+        nav.addWidget(self.counter, 1)
+        nav.addWidget(self.next_button)
+        left.addLayout(nav)
+        body.addLayout(left)
+
+        panel = QWidget(self)
+        right = QVBoxLayout(panel)
+        scroll = QScrollArea(self)
+        scroll.setWidget(panel)
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setMinimumWidth(360)
+        body.addWidget(scroll, 1)
+
+        box = QGroupBox('Badge', panel)
+        form = form_layout(box)
+        self.badge_combo = combo(box, badges_mod.badge_choices(
+            self.settings.get('user_badges')), self.settings.get('badge_preset'))
+        self.badge_combo.currentIndexChanged.connect(self._schedule)
+        form.addRow('Badge:', self.badge_combo)
+
+        self.text_edit = QLineEdit(box)
+        self.text_edit.textEdited.connect(self._schedule)
+        form.addRow('Text:', self.text_edit)
+
+        self.side_combo = combo(box, [
+            ('auto', 'Automatic - the quietest side'),
+            ('left', 'Left margin'), ('right', 'Right margin'),
+            ('tl', 'Top left corner'), ('tr', 'Top right corner'),
+            ('bl', 'Bottom left corner'), ('br', 'Bottom right corner')])
+        self.side_combo.currentIndexChanged.connect(self._schedule)
+        form.addRow('Position:', self.side_combo)
+
+        self.size_slider = IntensitySlider(box, 40, 200)
+        self.size_slider.valueChanged.connect(self._schedule)
+        form.addRow('Size:', self.size_slider)
+        self.opacity_slider = IntensitySlider(box, 20, 100)
+        self.opacity_slider.valueChanged.connect(self._schedule)
+        form.addRow('Opacity:', self.opacity_slider)
+
+        self.flowers_check = QCheckBox('Draw the flowers', box)
+        self.flowers_check.stateChanged.connect(self._schedule)
+        form.addRow('', self.flowers_check)
+        self.scrim_check = QCheckBox('Darken behind the badge', box)
+        self.scrim_check.stateChanged.connect(self._schedule)
+        form.addRow('', self.scrim_check)
+        right.addWidget(box)
+
+        note = QLabel(
+            'The artwork is not regenerated: the badge is drawn onto the '
+            'cover as it is. The previous cover is backed up, so Restore '
+            'previous cover undoes this.', panel)
+        note.setWordWrap(True)
+        right.addWidget(note)
+        right.addStretch(1)
+
+        buttons = QDialogButtonBox(self)
+        self.apply_button = buttons.addButton(
+            'Apply', QDialogButtonBox.ButtonRole.AcceptRole)
+        self.apply_button.clicked.connect(self._apply_one)
+        self.apply_all_button = buttons.addButton(
+            'Apply to all', QDialogButtonBox.ButtonRole.AcceptRole)
+        self.apply_all_button.clicked.connect(self._apply_all)
+        cancel = buttons.addButton(QDialogButtonBox.StandardButton.Cancel)
+        cancel.clicked.connect(self.reject)
+        self.apply_all_button.setVisible(len(self.entries) > 1)
+        outer.addWidget(buttons)
+
+    def _load_settings_into_ui(self):
+        s = self.settings
+        self.text_edit.setText(s.get('badge_text', ''))
+        index = self.side_combo.findData(s.get('badge_side', 'auto'))
+        self.side_combo.setCurrentIndex(max(0, index))
+        self.size_slider.set_value(s.get('badge_size_scale', 1.0))
+        self.opacity_slider.set_value(s.get('badge_opacity', 1.0))
+        self.flowers_check.setChecked(bool(s.get('badge_ornament', True)))
+        self.scrim_check.setChecked(bool(s.get('badge_scrim', True)))
+
+    def collect_settings(self):
+        s = dict(self.settings)
+        s['badge_enabled'] = True
+        s['badge_preset'] = combo_value(self.badge_combo,
+                                        badges_mod.DEFAULT_BADGE)
+        s['badge_text'] = self.text_edit.text()
+        s['badge_side'] = combo_value(self.side_combo, 'auto')
+        s['badge_size_scale'] = self.size_slider.value()
+        s['badge_opacity'] = self.opacity_slider.value()
+        s['badge_ornament'] = self.flowers_check.isChecked()
+        s['badge_scrim'] = self.scrim_check.isChecked()
+        self.settings = s
+        return s
+
+    def _current(self):
+        return self.entries[self.index]
+
+    def _show_entry(self):
+        self.counter.setText('%d / %d' % (self.index + 1, len(self.entries)))
+        self.prev_button.setEnabled(self.index > 0)
+        self.next_button.setEnabled(self.index < len(self.entries) - 1)
+        self.regenerate()
+
+    def _step(self, delta):
+        self.index = max(0, min(len(self.entries) - 1, self.index + delta))
+        self._show_entry()
+
+    def _schedule(self, *args):
+        self._timer.start()
+
+    def regenerate(self):
+        self._timer.stop()
+        settings = self.collect_settings()
+        entry = self._current()
+        if not entry.get('image'):
+            self.preview_label.setPixmap(QPixmap())
+            self.preview_label.setText('This book has no cover to stamp.')
+            return
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        try:
+            from PIL import Image
+            from . import imageops
+            source = imageops.load_image(entry['image'])
+            width = PREVIEW_WIDTH
+            height = max(1, int(source.height * width / float(source.width)))
+            small = source.resize((width, height), imageops.RESAMPLE_LANCZOS)
+            self.preview_label.setPixmap(
+                pil_to_pixmap(stamp_badge(small, settings)))
+            self.preview_label.setText('')
+        except Exception as err:
+            self.preview_label.setPixmap(QPixmap())
+            self.preview_label.setText('Preview failed:\n%s' % err)
+            import traceback
+            traceback.print_exc()
+        finally:
+            QApplication.restoreOverrideCursor()
+
+    def _apply_one(self):
+        self.collect_settings()
+        self.apply_to_all = False
+        self.accept()
+
+    def _apply_all(self):
         self.collect_settings()
         self.apply_to_all = True
         self.accept()

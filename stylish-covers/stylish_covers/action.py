@@ -22,7 +22,7 @@ from . import kobo_push
 from .config import get_settings, save_settings
 from .generator import BookInfo, render_cover_bytes, stamp_badge_bytes
 from .kobo_matching import DeviceIndex
-from .widgets import IMAGE_FILTER, PreviewDialog
+from .widgets import IMAGE_FILTER, BadgePreviewDialog, PreviewDialog
 
 PLUGIN_NAME = 'Stylish Covers'
 PLUGIN_ICON = 'images/icon.png'
@@ -335,6 +335,30 @@ class StylishCoversAction(InterfaceAction):
 
         db = self._db()
         library_id = self._library_id()
+
+        entries = []
+        for book_id in book_ids:
+            try:
+                cover = db.cover(book_id)
+            except Exception:
+                cover = None
+            entries.append({'book_id': book_id, 'image': cover})
+        if not any(e['image'] for e in entries):
+            error_dialog(self.gui, PLUGIN_NAME,
+                         'None of the selected books have a cover to stamp.',
+                         show=True)
+            return
+
+        dialog = BadgePreviewDialog(self.gui, entries, settings)
+        if dialog.exec() != dialog.DialogCode.Accepted:
+            return
+        settings = dialog.settings
+        save_settings(settings)
+        chosen = dialog.selected_entries()
+        book_ids = [e['book_id'] for e in chosen if e.get('image')]
+        if not book_ids:
+            return
+
         progress = QProgressDialog('Stamping the badge...', 'Cancel', 0,
                                    len(book_ids), self.gui)
         progress.setWindowTitle(PLUGIN_NAME)

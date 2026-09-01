@@ -146,6 +146,19 @@ regenerating anything: the artwork, the title and the author stay exactly as
 they are. Use this rather than regenerating, because regenerating from an
 already generated cover stacks a second layer of typography onto the first.
 
+![The badge preview](docs/badge-preview.png)
+
+It opens on your real covers, badge already drawn, with the settings that
+matter next to it. Walk through the selection with `<` and `>`, then **Apply**
+for the one on screen or **Apply to all**. Nothing is written until you do.
+
+### Changed your mind?
+
+The cover you replace is backed up first, exactly like a generated one, so
+**Restore previous cover** on the same books removes the badge and puts back
+what was there — even after a calibre restart. **Restore original cover** goes
+further back, to the cover the book had before this plugin ever touched it.
+
 ### The sleep screen
 
 A Kobo shows the cover of the book you are reading on its **sleep screen and
