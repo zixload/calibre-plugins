@@ -18,11 +18,13 @@ from qt.core import (QApplication, QFileDialog, QIcon, QMenu, QProgressDialog,
                      Qt, QToolButton)
 
 from . import backup
+from . import kobo_push
 from .config import get_settings, save_settings
-from .generator import BookInfo, render_cover_bytes
+from .generator import BookInfo, render_cover_bytes, stamp_badge_bytes
+from .kobo_matching import DeviceIndex
 from .widgets import IMAGE_FILTER, PreviewDialog
 
-PLUGIN_NAME = 'Stylish Cover Generator'
+PLUGIN_NAME = 'Stylish Covers'
 PLUGIN_ICON = 'images/icon.png'
 
 
@@ -42,7 +44,7 @@ def _swap_author(name):
     return ('%s %s' % (first.strip(), last.strip())).strip()
 
 
-class StylishCoverAction(InterfaceAction):
+class StylishCoversAction(InterfaceAction):
 
     name = PLUGIN_NAME
     action_spec = (
@@ -75,6 +77,21 @@ class StylishCoverAction(InterfaceAction):
             m, 'scg_custom_image', 'Generate from a chosen image...', icon=icon,
             description='Use any picture from your disk as the artwork',
             triggered=self.generate_from_image)
+        m.addSeparator()
+        self.create_menu_action(
+            m, 'scg_badge', 'Apply my badge to the existing covers',
+            description='Stamp the badge without regenerating the artwork',
+            triggered=self.stamp_badges)
+        m.addSeparator()
+        self.create_menu_action(
+            m, 'scg_kobo_push', 'Push covers to the Kobo',
+            description='Refresh the cover thumbnails on the connected device '
+                        'without resending the books',
+            triggered=self.push_to_kobo)
+        self.create_menu_action(
+            m, 'scg_kobo_info', 'Kobo device information...',
+            description='Model, paths and the thumbnail sizes it expects',
+            triggered=self.show_device_info)
         m.addSeparator()
         self.create_menu_action(
             m, 'scg_restore', 'Restore previous cover',
@@ -299,6 +316,183 @@ class StylishCoverAction(InterfaceAction):
         elif done:
             self.gui.status_bar.show_message(
                 '%d stylish cover(s) generated' % len(done), 4000)
+
+
+    # -- badge -------------------------------------------------------------
+    def stamp_badges(self, *args):
+        """Draw the badge on the covers as they are, without regenerating."""
+        book_ids = self.selected_ids()
+        if not book_ids:
+            return
+        settings = get_settings()
+        if not settings.get('badge_enabled') or not settings.get('badge_text'):
+            error_dialog(
+                self.gui, PLUGIN_NAME,
+                'No badge is configured yet. Open Settings, go to the Badge '
+                'tab, tick "Stamp my badge on the covers" and type the text '
+                'you want.', show=True)
+            return
+
+        db = self._db()
+        library_id = self._library_id()
+        progress = QProgressDialog('Stamping the badge...', 'Cancel', 0,
+                                   len(book_ids), self.gui)
+        progress.setWindowTitle(PLUGIN_NAME)
+        progress.setWindowModality(Qt.WindowModality.ApplicationModal)
+        progress.setMinimumDuration(0)
+
+        done, failures = [], []
+        for position, book_id in enumerate(book_ids):
+            if progress.wasCanceled():
+                break
+            progress.setValue(position)
+            QApplication.processEvents()
+            try:
+                cover = db.cover(book_id)
+            except Exception:
+                cover = None
+            if not cover:
+                failures.append(('book %s' % book_id, 'no cover to stamp'))
+                continue
+            try:
+                data = stamp_badge_bytes(cover, settings)
+                self._apply(db, library_id, book_id, data, settings, cover)
+                done.append(book_id)
+            except Exception as err:
+                traceback.print_exc()
+                failures.append(('book %s' % book_id, str(err)))
+        progress.setValue(len(book_ids))
+        if done:
+            self._refresh(done)
+        self._report(done, failures)
+
+    # -- kobo --------------------------------------------------------------
+    def _kobo_options(self, settings):
+        """The Kobo settings, stripped of their prefix for kobo_push."""
+        return dict((key[5:], value) for key, value in settings.items()
+                    if key.startswith('kobo_'))
+
+    def show_device_info(self, *args):
+        try:
+            device = kobo_push.connected_kobo(self.gui)
+        except kobo_push.DeviceError as err:
+            error_dialog(self.gui, PLUGIN_NAME, str(err), show=True)
+            return
+        info = kobo_push.device_summary(device)
+        books = kobo_push.device_books(self.gui)
+        lines = [
+            'Device: %s' % info['name'],
+            'Driver: %s' % info['driver'],
+            'Firmware: %s' % (info.get('firmware') or 'unknown'),
+            'Main memory: %s' % (info['main_prefix'] or 'unknown'),
+            'Books listed on the device: %d' % len(books),
+            '',
+            "Driver's own cover settings:",
+            '   Upload covers when sending: %s'
+            % ('on' if info['upload_covers'] else 'off'),
+            '   Keep cover aspect ratio: %s'
+            % ('on' if info['keep_cover_aspect'] else 'off'),
+            '   PNG thumbnails: %s' % ('on' if info['png_covers'] else 'off'),
+            '',
+            'Thumbnails written for this model:',
+        ]
+        for ending, size in info['sizes']:
+            lines.append('   %-28s %s'
+                         % (ending, '%dx%d' % size if size else '?'))
+        info_dialog(self.gui, PLUGIN_NAME, 'Kobo device information',
+                    det_msg='\n'.join(lines), show=True)
+
+    def push_to_kobo(self, *args):
+        book_ids = self.selected_ids()
+        if not book_ids:
+            return
+        try:
+            device = kobo_push.connected_kobo(self.gui)
+        except kobo_push.DeviceError as err:
+            error_dialog(self.gui, PLUGIN_NAME, str(err), show=True)
+            return
+
+        settings = get_settings()
+        index = DeviceIndex(kobo_push.device_books(self.gui))
+        if not len(index):
+            error_dialog(
+                self.gui, PLUGIN_NAME,
+                'calibre does not list any book on this device yet. Open the '
+                'device view once so it reads the device library, then try '
+                'again.', show=True)
+            return
+        if len(book_ids) > 20 and not question_dialog(
+                self.gui, PLUGIN_NAME,
+                'Push the covers of %d books onto the Kobo? The book files are '
+                'not resent, so your reading positions are safe.'
+                % len(book_ids)):
+            return
+
+        db = self._db()
+        options = kobo_push.driver_options(device, self._kobo_options(settings))
+        uuid_only = bool(settings.get('kobo_match_by_uuid_only'))
+        progress = QProgressDialog('Pushing covers...', 'Cancel', 0,
+                                   len(book_ids), self.gui)
+        progress.setWindowTitle(PLUGIN_NAME)
+        progress.setWindowModality(Qt.WindowModality.ApplicationModal)
+        progress.setMinimumDuration(0)
+
+        done, skipped, failures = [], [], []
+        for position, book_id in enumerate(book_ids):
+            if progress.wasCanceled():
+                break
+            try:
+                mi = db.get_metadata(book_id)
+            except Exception:
+                failures.append(('book %s' % book_id, 'unreadable metadata'))
+                continue
+            progress.setValue(position)
+            progress.setLabelText('%d / %d - %s'
+                                  % (position + 1, len(book_ids), mi.title or ''))
+            QApplication.processEvents()
+
+            device_book, how = index.find(getattr(mi, 'uuid', None), mi.title,
+                                          mi.authors, uuid_only=uuid_only)
+            if device_book is None:
+                skipped.append((mi.title or '', how))
+                continue
+            try:
+                cover = db.cover(book_id)
+            except Exception:
+                cover = None
+            try:
+                kobo_push.push_cover(device, device_book, cover, mi, options)
+                done.append(mi.title or '')
+            except Exception as err:
+                traceback.print_exc()
+                failures.append((mi.title or '', str(err)))
+        progress.setValue(len(book_ids))
+
+        details = []
+        if skipped:
+            details.append('Skipped:')
+            details += ['   %s - %s' % (t, w) for t, w in skipped]
+        if failures:
+            if details:
+                details.append('')
+            details.append('Failed:')
+            details += ['   %s - %s' % (t, w) for t, w in failures]
+        detail = '\n'.join(details) if details else None
+        if done and not (skipped or failures):
+            info_dialog(self.gui, PLUGIN_NAME,
+                        '%d cover(s) written to the Kobo.\n\nEject the device '
+                        'and let it finish its library scan to see them.'
+                        % len(done), show=True)
+        elif done:
+            info_dialog(self.gui, PLUGIN_NAME,
+                        '%d cover(s) written, %d skipped, %d failed.'
+                        % (len(done), len(skipped), len(failures)),
+                        det_msg=detail, show=True)
+        else:
+            error_dialog(self.gui, PLUGIN_NAME,
+                         'No cover could be written. None of the selected '
+                         'books were matched with a book on the device.',
+                         det_msg=detail, show=True)
 
     # -- restore -----------------------------------------------------------
     def restore_previous(self, *args):

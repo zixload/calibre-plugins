@@ -4,7 +4,7 @@
 Build the installable ZIP of one plugin, or of every plugin in this repo.
 
     python build.py                          # all plugins -> dist/
-    python build.py stylish-cover-generator  # just that one
+    python build.py stylish-covers  # just that one
 
 A plugin lives in its own top level directory and contains exactly one python
 package holding __init__.py next to a plugin-import-name-<name>.txt marker.

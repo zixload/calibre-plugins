@@ -8,12 +8,12 @@ installable ZIP per plugin.
 calibre**. Nothing else to install — everything the plugins need already ships
 with calibre.
 
-## Stylish Cover Generator
+## Stylish Covers
 
 Builds real webnovel / dark fantasy covers out of the artwork a book already
 has and its metadata, and saves the result as the book cover.
 
-![The four presets of Stylish Cover Generator](stylish-cover-generator/docs/presets-comparison.jpg)
+![The four presets of Stylish Covers](stylish-covers/docs/presets-comparison.jpg)
 
 <sub>The same illustration and the same metadata run through the four presets,
 with no manual tweaking.</sub>
@@ -22,8 +22,12 @@ Four presets, automatic typography, automatic contrast behind the text, full
 chinese / korean / japanese support, batch mode and one-click restore of the
 previous cover.
 
-⬇ **[Download stylish-cover-generator.zip (v1.0.2)](https://github.com/zixload/calibre-plugins/releases/download/stylish-cover-generator-v1.0.2/stylish-cover-generator.zip)**
- · [documentation](stylish-cover-generator/)
+It also stamps **your own badge** in the margin — a name, a seal, your mark —
+and **pushes the covers onto a connected Kobo** without resending the books,
+so a cover change never costs you your reading position.
+
+⬇ **[Download stylish-covers.zip (v2.0.0)](https://github.com/zixload/calibre-plugins/releases/download/stylish-covers-v2.0.0/stylish-covers.zip)**
+ · [documentation](stylish-covers/)
 
 ## Metadata Tidy
 
@@ -38,19 +42,6 @@ refuses to guess: a title without a volume marker is left strictly alone.
 
 ⬇ **[Download metadata-tidy.zip (v1.0.0)](https://github.com/zixload/calibre-plugins/releases/download/metadata-tidy-v1.0.0/metadata-tidy.zip)**
  · [documentation](metadata-tidy/)
-
-## Kobo Cover Pusher
-
-Writes the covers from your calibre library straight into the thumbnail cache
-of a connected Kobo, without resending the book files — so a cover change no
-longer costs you your reading position, bookmarks and annotations.
-
-A Kobo never reads the cover out of the EPUB: it shows thumbnails it generated
-once, which is why a new cover in calibre changes nothing on the device until
-something rewrites them.
-
-⬇ **[Download kobo-cover-pusher.zip (v1.0.0)](https://github.com/zixload/calibre-plugins/releases/download/kobo-cover-pusher-v1.0.0/kobo-cover-pusher.zip)**
- · [documentation](kobo-cover-pusher/)
 
 ## Cross-Check
 
@@ -71,14 +62,14 @@ Being a metadata source, it adds no toolbar button: it appears in
 
 ## Using them together
 
-The four plugins cover four different steps, and **the order matters**.
+The three plugins cover four steps, and **the order matters**.
 
 | # | Step | Plugin | Why here |
 |---|---|---|---|
 | 1 | Extract the series and volume number from titles | **Metadata Tidy** | must run **first**: downloading metadata rewrites titles, and `Vagabond part 02` becomes `Vagabond`, taking the volume number with it |
 | 2 | Fill authors, tags, description, publisher, year, cover | **Cross-Check**, through calibre's *Download metadata* | no online source knows how your files are split into volumes, which is why step 1 comes before |
-| 3 | Build the covers | **Stylish Cover Generator** | now that the series is filled in, presets can print it |
-| 4 | Refresh the covers on the Kobo | **Kobo Cover Pusher** | writes the thumbnails without resending the books |
+| 3 | Build the covers | **Stylish Covers** | now that the series is filled in, presets can print it |
+| 4 | Refresh the covers on the Kobo | **Stylish Covers** again | writes the thumbnails without resending the books |
 
 The two metadata plugins are complementary, not alternatives: Cross-Check
 never returns a series or a volume number for manga and light novels — AniList

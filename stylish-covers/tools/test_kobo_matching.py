@@ -21,8 +21,8 @@ for stream in (sys.stdout, sys.stderr):
         pass
 
 _PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                     'kobo_cover_pusher', 'matching.py')
-_spec = importlib.util.spec_from_file_location('kcp_matching', _PATH)
+                     'stylish_covers', 'kobo_matching.py')
+_spec = importlib.util.spec_from_file_location('sc_kobo_matching', _PATH)
 matching = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(matching)
 

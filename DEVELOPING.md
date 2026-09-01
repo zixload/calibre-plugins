@@ -7,14 +7,14 @@ need any of this — see the plugin's own README.
 
 ```bash
 python build.py                          # every plugin, into dist/
-python build.py stylish-cover-generator  # just one
+python build.py stylish-covers  # just one
 ```
 
 Then, with calibre closed:
 
 ```bash
-calibre-customize -a dist/stylish-cover-generator.zip
-calibre-customize -r "Stylish Cover Generator"
+calibre-customize -a dist/stylish-covers.zip
+calibre-customize -r "Stylish Covers"
 ```
 
 ## Repository layout
@@ -37,7 +37,7 @@ fail. The ZIP holds the content of the package at its root; `tools/`,
 `samples/` and `__pycache__/` are excluded.
 
 The version of record is `version = (x, y, z)` in `__init__.py`. Tags are
-prefixed with the plugin name, e.g. `stylish-cover-generator-v1.0.2`.
+prefixed with the plugin name, e.g. `stylish-covers-v1.0.2`.
 
 ## Releasing
 
@@ -57,7 +57,9 @@ released last.
 
 ---
 
-# Stylish Cover Generator
+---
+
+# Stylish Covers
 
 ## Architecture
 
@@ -73,6 +75,9 @@ second knows Qt, and the third knows nothing but Pillow.
 | `backup.py` | cover backup and restore | calibre (config path) |
 | `generator.py` | render orchestration, layout, auto contrast | Pillow |
 | `presets.py` | preset data | — |
+| `badges.py` | the personal mark: ornaments, placement, drawing | Pillow |
+| `kobo_matching.py` | pairing library books with device books | nothing |
+| `kobo_push.py` | finding the device, paths, calling the driver | calibre (device driver) |
 | `textfx.py` | wrapping, size fitting, text effects, vertical text | Pillow |
 | `imageops.py` | crop/resize, grading, gradients, luminance probing | Pillow |
 | `fonts.py` | font discovery, `cmap` reading, fallback | Pillow |
@@ -91,10 +96,11 @@ calibre-debug tools/gui_smoke.py          # builds the dialogs, without calibre
 calibre-debug tools/library_roundtrip.py  # throwaway library: read, generate,
                                           # back up, restore
 calibre-debug tools/make_icon.py          # regenerates images/icon.png
+python tools/test_kobo_matching.py        # 11 device matching cases, no device
 ```
 
 The middle three need the plugin installed, since they import through
-`calibre_plugins.stylish_cover_generator`.
+`calibre_plugins.stylish_covers`.
 
 ## Preset format
 
@@ -114,7 +120,7 @@ preset renders identically at any output resolution.
 New built-in presets go in `presets.py` and into `BUILTIN_PRESETS`.
 
 A preset can also be defined without touching the code, through the
-`user_presets` key of `%APPDATA%\calibre\plugins\stylish_cover_generator.json`,
+`user_presets` key of `%APPDATA%\calibre\plugins\stylish_covers.json`,
 inheriting from a built-in one via `base`. Merging is recursive, so only the
 keys you change need to be declared:
 
@@ -147,6 +153,57 @@ chain covers all of the Asian text it is used throughout — mixing two faces
 inside one word looks wrong. Otherwise substitution happens character by
 character down the chain.
 
+
+---
+
+## Pushing covers to a Kobo
+
+### Modules
+
+| File | Role | Depends on |
+|---|---|---|
+| `__init__.py` | plugin declaration | `calibre.customize` |
+| `action.py` | toolbar, menu, the push loop | calibre + Qt |
+| `config.py` | persistent settings + configuration dialog | calibre + Qt |
+| `pusher.py` | finding the device, paths, calling the driver | calibre (device driver) |
+| `matching.py` | pairing library books with device books | nothing |
+
+### What it leans on
+
+The Kobo thumbnail format, the sizes per model and the ImageId lookup are
+**not** reimplemented here. `pusher.push_cover` writes the calibre cover to a
+temporary file and hands it to the KoboTouch driver:
+
+```python
+device._upload_cover(dirname, basename_without_extension, metadata, filepath,
+                     uploadgrayscale, dithered_covers=..., keep_cover_aspect=...,
+                     letterbox_fs_covers=..., png_covers=..., letterbox_color=...)
+```
+
+`_upload_cover` rather than the public `upload_cover`, because the public one
+returns immediately when the driver's *Upload covers* option is off — and
+pushing covers on demand is the whole point. That is the one calibre internal
+this plugin depends on; `push_cover` checks it exists and reports plainly if a
+future calibre drops it.
+
+`metadata` needs a `cover` attribute holding a path to an image file. The
+driver derives the ContentID from `filepath` and looks the ImageId up in the
+device's `KoboReader.sqlite`.
+
+### Tools
+
+```bash
+python tools/test_matching.py     # 11 matching cases, no calibre, no device
+calibre-debug tools/gui_smoke.py  # dialog + the no-device error paths
+calibre-debug tools/make_icon.py  # regenerates the icon
+```
+
+Everything except the final write to the device can be exercised without a
+Kobo: `matching.py` is duck typed, so the device books are stand-in objects in
+the tests.
+
+
+---
 
 ---
 
@@ -193,56 +250,6 @@ rule must **not** match to `NEGATIVE`. The negative list matters more than the
 positive one: a plugin that invents a series is worse than one that misses a
 few.
 
-
----
-
-# Kobo Cover Pusher
-
-## Architecture
-
-| File | Role | Depends on |
-|---|---|---|
-| `__init__.py` | plugin declaration | `calibre.customize` |
-| `action.py` | toolbar, menu, the push loop | calibre + Qt |
-| `config.py` | persistent settings + configuration dialog | calibre + Qt |
-| `pusher.py` | finding the device, paths, calling the driver | calibre (device driver) |
-| `matching.py` | pairing library books with device books | nothing |
-
-## What it leans on
-
-The Kobo thumbnail format, the sizes per model and the ImageId lookup are
-**not** reimplemented here. `pusher.push_cover` writes the calibre cover to a
-temporary file and hands it to the KoboTouch driver:
-
-```python
-device._upload_cover(dirname, basename_without_extension, metadata, filepath,
-                     uploadgrayscale, dithered_covers=..., keep_cover_aspect=...,
-                     letterbox_fs_covers=..., png_covers=..., letterbox_color=...)
-```
-
-`_upload_cover` rather than the public `upload_cover`, because the public one
-returns immediately when the driver's *Upload covers* option is off — and
-pushing covers on demand is the whole point. That is the one calibre internal
-this plugin depends on; `push_cover` checks it exists and reports plainly if a
-future calibre drops it.
-
-`metadata` needs a `cover` attribute holding a path to an image file. The
-driver derives the ContentID from `filepath` and looks the ImageId up in the
-device's `KoboReader.sqlite`.
-
-## Tools
-
-```bash
-python tools/test_matching.py     # 11 matching cases, no calibre, no device
-calibre-debug tools/gui_smoke.py  # dialog + the no-device error paths
-calibre-debug tools/make_icon.py  # regenerates the icon
-```
-
-Everything except the final write to the device can be exercised without a
-Kobo: `matching.py` is duck typed, so the device books are stand-in objects in
-the tests.
-
-
 ---
 
 # Cross-Check
@@ -270,7 +277,7 @@ Write a function `myapi(fetch, title, authors, log) -> [Candidate]` in
 to `PROVIDERS` and a matching `Option('use_mykey', 'bool', ...)` in
 `__init__.py`. Keyless APIs only.
 
-## Tools
+### Tools
 
 ```bash
 python tools/test_merge.py            # 13 merging rules, no network

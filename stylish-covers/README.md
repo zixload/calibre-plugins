@@ -1,4 +1,4 @@
-# Stylish Cover Generator
+# Stylish Covers
 
 A calibre plugin that builds real webnovel / dark fantasy covers out of the
 artwork a book already has (or any image on your disk) and its metadata, then
@@ -59,7 +59,7 @@ settings on the right.</sub>
 
 ## Installation
 
-1. **[Download stylish-cover-generator.zip](https://github.com/zixload/calibre-plugins/releases/download/stylish-cover-generator-v1.0.2/stylish-cover-generator.zip)** (v1.0.2).
+1. **[Download stylish-covers.zip](https://github.com/zixload/calibre-plugins/releases/download/stylish-covers-v2.0.0/stylish-covers.zip)** (v2.0.0).
 2. In calibre: **Preferences → Plugins → Load plugin from file**, and pick the
    ZIP.
 3. Accept adding the button to the toolbar, then **restart calibre**.
@@ -76,6 +76,9 @@ Select one or more books, then use the **Stylish Covers** toolbar button.
 | **Generate stylish covers** | generates straight away with your saved settings, for every selected book, with a cancellable progress bar |
 | **Preview…** | opens the preview window (also what a plain click on the button does) |
 | **Generate from a chosen image…** | asks for an image on disk and uses it as the artwork instead of the current cover |
+| **Apply my badge to the existing covers** | stamps your badge without regenerating the artwork |
+| **Push covers to the Kobo** | refreshes the thumbnails on a connected device, without resending the books |
+| **Kobo device information…** | model, firmware, paths and expected thumbnail sizes |
 | **Restore previous cover** | puts back the cover replaced by the last generation |
 | **Restore original cover** | puts back the cover from before the very first generation |
 | **Settings…** | opens the configuration |
@@ -113,6 +116,63 @@ switch, every value being a multiplier on what the preset was designed with —
 
 ![Effect settings](docs/settings-effects.png)
 
+## Your own badge
+
+![The four badges](docs/badges.jpg)
+
+<sub>The same cover with each of the four badges: Vine, Mark, Seal, Ribbon.</sub>
+
+A badge is your library's mark, not the book's: a name in the margin, a seal
+in a corner. It is drawn last, in the margins the presets keep free, so it
+never collides with the title or the author.
+
+**Settings → Badge**: tick it, choose one of the four, and type your text —
+anything, in any script, `루카의 서재` as well as `Luca's library`. Size,
+opacity, colour and the flowers are all adjustable.
+
+Placement is automatic by default: the plugin measures how busy each margin is
+and picks the calmer one. It measures detail, so it **cannot recognise
+lettering already painted into the artwork** — when a cover already carries
+vertical credits, force the side by hand.
+
+**Apply my badge to the existing covers** stamps the badge without
+regenerating anything: the artwork, the title and the author stay exactly as
+they are. Use this rather than regenerating, because regenerating from an
+already generated cover stacks a second layer of typography onto the first.
+
+A Kobo shows the cover of the book you are reading on its sleep screen, which
+is where the badge ends up.
+
+## Sending covers to a Kobo
+
+A Kobo does not read the cover out of the EPUB: it shows thumbnails it
+generated once and stored in its own cache, which is why a new cover in
+calibre changes nothing on the device.
+
+**Push covers to the Kobo** writes those thumbnails directly, **without
+resending the book files**, so reading positions, bookmarks and annotations
+are untouched. Connect the Kobo, open the device view once so calibre reads
+the device library, select your books, and push. Then eject and let the device
+finish its scan.
+
+Books are paired with the copies on the device by calibre identifier first,
+then title and author ignoring case, accents and punctuation, then title alone
+when it is unique on the device. Two books sharing a title are never guessed
+at, they are reported as skipped.
+
+**Kobo device information…** reports the model, the firmware, the paths and
+the exact thumbnail sizes your model expects — useful to know what resolution
+to generate at.
+
+### And the metadata?
+
+This pushes **covers**. Title, author and description are calibre's job, and
+the switch is off by default, which is why a Kobo keeps showing the old author
+after you fixed it. With the Kobo connected: **Preferences → Plugins → Device
+interface → KoboTouch → Customize**, tab **"Metadata, on device && advanced"**,
+tick **"Update metadata on Book Details pages"**. calibre then updates the
+device database when the device connects, so reconnect it once.
+
 ## Fonts
 
 No font ships with the plugin, for licensing reasons. By default it picks a
@@ -144,12 +204,24 @@ per collection.
 
 ## Where things are stored
 
-Settings live in `%APPDATA%\calibre\plugins\stylish_cover_generator.json`, and
+Settings live in `%APPDATA%\calibre\plugins\stylish_covers.json`, and
 the backed up covers in
-`%APPDATA%\calibre\plugins\stylish_cover_generator_backups\`. Previous covers
+`%APPDATA%\calibre\plugins\stylish_covers_backups\`. Previous covers
 are capped at 800 files; original covers are never deleted.
 
 ## Licence
 
 GPL-3.0, like calibre itself. Building it from source and the internals are
 covered in [DEVELOPING.md](../DEVELOPING.md).
+
+## Renamed in 2.0.0
+
+This plugin was called **Stylish Cover Generator** until version 2.0.0, and
+the separate **Kobo Cover Pusher** plugin has been merged into it: pushing a
+cover to a device belongs to the same gesture as making it.
+
+calibre keys plugins by name, so the new version installs alongside the old
+one. **Remove Stylish Cover Generator and Kobo Cover Pusher** in
+Preferences → Plugins, or you will end up with three toolbar buttons. Your
+settings are migrated automatically on first run, and covers backed up by the
+old version stay restorable.

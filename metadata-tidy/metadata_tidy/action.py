@@ -61,7 +61,7 @@ class MetadataTidyAction(InterfaceAction):
         self.create_menu_action(
             m, 'mdt_column', 'Create the #original_title column...',
             description='A text column for the original chinese, korean or '
-                        'japanese title, used by Stylish Cover Generator',
+                        'japanese title, used by Stylish Covers',
             triggered=self.create_original_title_column)
         self.create_menu_action(
             m, 'mdt_settings', 'Settings...',

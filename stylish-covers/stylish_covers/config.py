@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Persistent configuration and the settings dialog shown by
-Preferences -> Plugins -> Stylish Cover Generator -> Customize plugin.
+Preferences -> Plugins -> Stylish Covers -> Customize plugin.
 
 The only calibre dependency here is JSONConfig; everything the renderer needs
 travels as a plain dict, so generator.py stays calibre-free.
@@ -13,24 +13,67 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import copy
 
 from calibre.utils.config import JSONConfig
-from qt.core import (QCheckBox, QComboBox, QHBoxLayout,
+from qt.core import (QCheckBox, QComboBox, QGroupBox, QHBoxLayout,
                      QInputDialog, QLabel, QLineEdit, QMessageBox, QPushButton,
                      QSpinBox, QTabWidget, QVBoxLayout, QWidget)
 
+from . import badges as badges_mod
 from . import presets as presets_mod
 from .fonts import FontBook
 from .generator import SETTINGS_DEFAULTS
 from .widgets import (FONT_FILTER, DirPicker, FilePicker, IntensitySlider,
                       combo, combo_value, form_layout)
 
-STORE_NAME = 'plugins/stylish_cover_generator'
+STORE_NAME = 'plugins/stylish_covers'
 
 prefs = JSONConfig(STORE_NAME)
 prefs.defaults.update(copy.deepcopy(SETTINGS_DEFAULTS))
 
 
+LEGACY_STORE = 'stylish_cover_generator.json'
+LEGACY_KOBO_STORE = 'kobo_cover_pusher.json'
+
+
+def _migrate_legacy():
+    """Carry over the settings saved under the plugin's previous name.
+
+    The plugin was called Stylish Cover Generator until 2.0.0; calibre keys its
+    configuration by name, so without this the rename would silently reset
+    every preference.
+    """
+    if prefs.get('_migrated'):
+        return
+    try:
+        import json
+        import os
+        from calibre.constants import config_dir
+        old = os.path.join(config_dir, 'plugins', LEGACY_STORE)
+        if os.path.isfile(old):
+            with open(old, encoding='utf-8') as f:
+                data = json.load(f)
+            for key, value in (data or {}).items():
+                if key in SETTINGS_DEFAULTS and key not in prefs:
+                    prefs[key] = value
+        # Kobo Cover Pusher was a separate plugin until 2.0.0; its options
+        # live here now, under a kobo_ prefix
+        old_kobo = os.path.join(config_dir, 'plugins', LEGACY_KOBO_STORE)
+        if os.path.isfile(old_kobo):
+            with open(old_kobo, encoding='utf-8') as f:
+                data = json.load(f)
+            for key, value in (data or {}).items():
+                target = 'kobo_%s' % key
+                if key == 'use_driver_settings':
+                    target = 'kobo_use_driver_settings'
+                if target in SETTINGS_DEFAULTS and target not in prefs:
+                    prefs[target] = value
+    except Exception:
+        pass
+    prefs['_migrated'] = True
+
+
 def get_settings():
     """Full settings dict: defaults completed by whatever the user changed."""
+    _migrate_legacy()
     out = copy.deepcopy(SETTINGS_DEFAULTS)
     for key in SETTINGS_DEFAULTS:
         if key in prefs:
@@ -53,6 +96,12 @@ STYLE_KEYS = ('preset', 'title_position', 'author_position', 'title_size_scale',
               'asian_size_scale')
 
 
+BADGE_PLACEHOLDER = '\uB8E8\uCE74\uC758 \uC11C\uC7AC'
+COLOUR_PLACEHOLDER = "empty = the badge's own colour"
+BADGE_NOTE = "The badge is your library's mark, not the book's: it is drawn last, in the margins the presets keep free, so it never collides with the title or the author. Automatic placement measures how busy each margin is, but it cannot recognise lettering already painted into the artwork - force a side when that happens."
+KOBO_NOTE = ('Covers are written straight into the device thumbnail cache, so the book files are never resent and your reading position, bookmarks and annotations are untouched. A Kobo shows the cover of the book you are reading on its sleep screen, which is where the badge shows up.')
+
+
 class ConfigWidget(QWidget):
     """Tabbed settings editor: Output, Style, Fonts, Effects, Asian, Metadata."""
 
@@ -67,6 +116,8 @@ class ConfigWidget(QWidget):
         self.tabs.addTab(self._fonts_tab(), 'Fonts')
         self.tabs.addTab(self._effects_tab(), 'Effects')
         self.tabs.addTab(self._asian_tab(), 'Asian title')
+        self.tabs.addTab(self._badge_tab(), 'Badge')
+        self.tabs.addTab(self._kobo_tab(), 'Kobo')
         self.tabs.addTab(self._metadata_tab(), 'Metadata')
         self._load()
 
@@ -247,6 +298,97 @@ class ConfigWidget(QWidget):
         form.addRow('', note)
         return page
 
+    def _badge_tab(self):
+        page = QWidget(self)
+        form = form_layout(page)
+        self.badge_check = QCheckBox('Stamp my badge on the covers', page)
+        form.addRow('', self.badge_check)
+
+        self.badge_preset = combo(page, badges_mod.badge_choices(
+            self.settings.get('user_badges')))
+        self.badge_preset.currentIndexChanged.connect(self._update_badge_help)
+        form.addRow('Badge:', self.badge_preset)
+        self.badge_help = QLabel('', page)
+        self.badge_help.setWordWrap(True)
+        form.addRow('', self.badge_help)
+
+        self.badge_text = QLineEdit(page)
+        self.badge_text.setPlaceholderText(BADGE_PLACEHOLDER)
+        form.addRow('Text:', self.badge_text)
+
+        self.badge_side = combo(page, [
+            ('auto', 'Automatic - the quietest side'),
+            ('left', 'Left margin'), ('right', 'Right margin'),
+            ('tl', 'Top left corner'), ('tr', 'Top right corner'),
+            ('bl', 'Bottom left corner'), ('br', 'Bottom right corner')])
+        form.addRow('Position:', self.badge_side)
+
+        self.badge_size = IntensitySlider(page, 40, 200)
+        form.addRow('Size:', self.badge_size)
+        self.badge_opacity = IntensitySlider(page, 20, 100)
+        form.addRow('Opacity:', self.badge_opacity)
+
+        self.badge_color = QLineEdit(page)
+        self.badge_color.setPlaceholderText(COLOUR_PLACEHOLDER)
+        form.addRow('Colour:', self.badge_color)
+
+        self.badge_ornament = QCheckBox('Draw the flowers', page)
+        form.addRow('', self.badge_ornament)
+        self.badge_scrim = QCheckBox(
+            'Darken behind the badge so it stays readable', page)
+        form.addRow('', self.badge_scrim)
+
+        note = QLabel(BADGE_NOTE, page)
+        note.setWordWrap(True)
+        form.addRow('', note)
+        return page
+
+    def _kobo_tab(self):
+        page = QWidget(self)
+        outer = QVBoxLayout(page)
+        self.kobo_use_driver = QCheckBox(
+            "Use the Kobo driver's own cover settings", page)
+        self.kobo_use_driver.setToolTip(
+            'Preferences -> Plugins -> Device interface -> KoboTouch. '
+            'Uncheck to decide here instead.')
+        self.kobo_use_driver.toggled.connect(self._sync_kobo)
+        outer.addWidget(self.kobo_use_driver)
+
+        box = QGroupBox('Used when the box above is unchecked', page)
+        form = form_layout(box)
+        self.kobo_keep_aspect = QCheckBox('Keep the cover aspect ratio', box)
+        self.kobo_grayscale = QCheckBox('Convert to greyscale', box)
+        self.kobo_png = QCheckBox('Write PNG thumbnails', box)
+        self.kobo_dithered = QCheckBox('Dither (older e-ink screens)', box)
+        self.kobo_letterbox = QCheckBox('Letterbox full screen covers', box)
+        for widget in (self.kobo_keep_aspect, self.kobo_grayscale,
+                       self.kobo_png, self.kobo_dithered, self.kobo_letterbox):
+            form.addRow('', widget)
+        outer.addWidget(box)
+        self.kobo_box = box
+
+        self.kobo_uuid_only = QCheckBox(
+            'Only match books by their calibre identifier, never by title',
+            page)
+        self.kobo_uuid_only.setToolTip(
+            'Safest, but it skips books that reached the Kobo by any route '
+            'other than calibre.')
+        outer.addWidget(self.kobo_uuid_only)
+
+        note = QLabel(KOBO_NOTE, page)
+        note.setWordWrap(True)
+        outer.addWidget(note)
+        outer.addStretch(1)
+        return page
+
+    def _sync_kobo(self, *args):
+        self.kobo_box.setEnabled(not self.kobo_use_driver.isChecked())
+
+    def _update_badge_help(self):
+        spec = badges_mod.get_badge(combo_value(self.badge_preset),
+                                    self.settings.get('user_badges'))
+        self.badge_help.setText(spec.get('description', ''))
+
     def _metadata_tab(self):
         page = QWidget(self)
         form = form_layout(page)
@@ -390,6 +532,27 @@ class ConfigWidget(QWidget):
         self._set_combo(self.asian_mode, s.get('asian_mode', 'auto'))
         self.asian_size.set_value(s.get('asian_size_scale', 1.0))
 
+        self.badge_check.setChecked(bool(s.get('badge_enabled')))
+        self._set_combo(self.badge_preset, s.get('badge_preset'))
+        self.badge_text.setText(s.get('badge_text', ''))
+        self._set_combo(self.badge_side, s.get('badge_side', 'auto'))
+        self.badge_size.set_value(s.get('badge_size_scale', 1.0))
+        self.badge_opacity.set_value(s.get('badge_opacity', 1.0))
+        self.badge_color.setText(s.get('badge_color', ''))
+        self.badge_ornament.setChecked(bool(s.get('badge_ornament', True)))
+        self.badge_scrim.setChecked(bool(s.get('badge_scrim', True)))
+        self._update_badge_help()
+
+        self.kobo_use_driver.setChecked(
+            bool(s.get('kobo_use_driver_settings', True)))
+        self.kobo_keep_aspect.setChecked(bool(s.get('kobo_keep_aspect', True)))
+        self.kobo_grayscale.setChecked(bool(s.get('kobo_grayscale')))
+        self.kobo_png.setChecked(bool(s.get('kobo_png')))
+        self.kobo_dithered.setChecked(bool(s.get('kobo_dithered')))
+        self.kobo_letterbox.setChecked(bool(s.get('kobo_letterbox')))
+        self.kobo_uuid_only.setChecked(bool(s.get('kobo_match_by_uuid_only')))
+        self._sync_kobo()
+
         self.title_template.setText(s.get('title_template', ''))
         self.author_template.setText(s.get('author_template', ''))
         self.swap_check.setChecked(bool(s.get('author_swap')))
@@ -433,6 +596,25 @@ class ConfigWidget(QWidget):
             'asian_mode': combo_value(self.asian_mode, 'auto'),
             'asian_size_scale': self.asian_size.value(),
 
+            'badge_enabled': self.badge_check.isChecked(),
+            'badge_preset': combo_value(self.badge_preset,
+                                        badges_mod.DEFAULT_BADGE),
+            'badge_text': self.badge_text.text().strip(),
+            'badge_side': combo_value(self.badge_side, 'auto'),
+            'badge_size_scale': self.badge_size.value(),
+            'badge_opacity': self.badge_opacity.value(),
+            'badge_color': self.badge_color.text().strip(),
+            'badge_ornament': self.badge_ornament.isChecked(),
+            'badge_scrim': self.badge_scrim.isChecked(),
+
+            'kobo_use_driver_settings': self.kobo_use_driver.isChecked(),
+            'kobo_keep_aspect': self.kobo_keep_aspect.isChecked(),
+            'kobo_grayscale': self.kobo_grayscale.isChecked(),
+            'kobo_png': self.kobo_png.isChecked(),
+            'kobo_dithered': self.kobo_dithered.isChecked(),
+            'kobo_letterbox': self.kobo_letterbox.isChecked(),
+            'kobo_match_by_uuid_only': self.kobo_uuid_only.isChecked(),
+
             'title_template': self.title_template.text().strip(),
             'author_template': self.author_template.text().strip(),
             'author_swap': self.swap_check.isChecked(),
@@ -444,7 +626,7 @@ class ConfigWidget(QWidget):
 
     def validate(self):
         if self.width_spin.value() < 400 or self.height_spin.value() < 600:
-            QMessageBox.warning(self, 'Stylish Cover Generator',
+            QMessageBox.warning(self, 'Stylish Covers',
                                 'The output is very small; 1600x2400 is '
                                 'recommended.')
         return True

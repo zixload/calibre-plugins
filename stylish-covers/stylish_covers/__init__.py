@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Stylish Cover Generator - a calibre interface plugin.
+Stylish Covers - a calibre interface plugin.
 
 Turns the artwork a book already has into a real webnovel / dark fantasy cover
 by compositing typography over it, then saves the result as the book cover.
@@ -15,25 +15,26 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from calibre.customize import InterfaceActionBase
 
 
-class StylishCoverGenerator(InterfaceActionBase):
+class StylishCovers(InterfaceActionBase):
 
-    name = 'Stylish Cover Generator'
-    description = ('Generate stylish book covers from the existing cover art '
-                   'and the metadata: dark fantasy, webnovel, wuxia or minimal '
-                   'presets, with automatic contrast and CJK support.')
+    name = 'Stylish Covers'
+    description = ('Compose book covers from the existing artwork and the '
+                   'metadata: dark fantasy, webnovel, wuxia or minimal presets, '
+                   'automatic contrast, full CJK support, your own badge in the '
+                   'margin, and one click to refresh the covers on a Kobo.')
     supported_platforms = ['windows', 'osx', 'linux']
     author = 'huosh1'
-    version = (1, 0, 2)
+    version = (2, 0, 0)
     minimum_calibre_version = (6, 0, 0)
 
-    actual_plugin = 'calibre_plugins.stylish_cover_generator.action:StylishCoverAction'
+    actual_plugin = 'calibre_plugins.stylish_covers.action:StylishCoversAction'
 
     def is_customizable(self):
         return True
 
     def config_widget(self):
         if self.actual_plugin_:
-            from calibre_plugins.stylish_cover_generator.config import ConfigWidget
+            from calibre_plugins.stylish_covers.config import ConfigWidget
             return ConfigWidget()
         return None
 

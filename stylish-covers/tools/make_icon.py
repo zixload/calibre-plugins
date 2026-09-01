@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Regenerate stylish_cover_generator/images/icon.png.
+Regenerate stylish_covers/images/icon.png.
 
 Run it with calibre's own python so Pillow is available:
 
@@ -17,7 +17,7 @@ from PIL import Image, ImageDraw, ImageFilter
 
 SIZE = 256
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..',
-                   'stylish_cover_generator', 'images', 'icon.png')
+                   'stylish_covers', 'images', 'icon.png')
 
 
 def vertical_gradient(size, top, bottom):

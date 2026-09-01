@@ -95,7 +95,7 @@ Select some books, then use the **Metadata Tidy** toolbar button.
 |---|---|
 | **Tidy selected books…** | opens the preview, applies what you keep |
 | **Undo last tidy** | puts back the titles, series and authors from the last run, even after a calibre restart |
-| **Create the #original_title column…** | adds a text column for the original chinese, korean or japanese title — this is the column [Stylish Cover Generator](../stylish-cover-generator/) reads for its Asian subtitle |
+| **Create the #original_title column…** | adds a text column for the original chinese, korean or japanese title — this is the column [Stylish Covers](../stylish-covers/) reads for its Asian subtitle |
 | **Settings…** | which fixes are proposed |
 
 ## Where things are stored

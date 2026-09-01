@@ -15,7 +15,10 @@ import time
 
 from calibre.constants import config_dir
 
-BACKUP_DIRNAME = 'stylish_cover_generator_backups'
+BACKUP_DIRNAME = 'stylish_covers_backups'
+# the plugin was called Stylish Cover Generator until 2.0.0; covers backed up
+# back then must stay restorable
+LEGACY_DIRNAME = 'stylish_cover_generator_backups'
 MAX_BACKUPS = 800
 
 
@@ -56,13 +59,22 @@ def store(library_id, book_id, data, kind='prev'):
         return False
 
 
+def legacy_path(library_id, book_id, kind='prev'):
+    return os.path.join(config_dir, 'plugins', LEGACY_DIRNAME,
+                        '%s__%s%s' % (_safe(library_id), _safe(book_id),
+                                      KINDS.get(kind, '.bak')))
+
+
 def has_backup(library_id, book_id, kind='prev'):
-    return os.path.isfile(backup_path(library_id, book_id, kind))
+    return (os.path.isfile(backup_path(library_id, book_id, kind)) or
+            os.path.isfile(legacy_path(library_id, book_id, kind)))
 
 
 def load(library_id, book_id, kind='prev'):
     """Return the saved cover bytes, b'' if the book had no cover, else None."""
     path = backup_path(library_id, book_id, kind)
+    if not os.path.isfile(path):
+        path = legacy_path(library_id, book_id, kind)
     if not os.path.isfile(path):
         return None
     try:
@@ -73,10 +85,12 @@ def load(library_id, book_id, kind='prev'):
 
 
 def discard(library_id, book_id, kind='prev'):
-    try:
-        os.remove(backup_path(library_id, book_id, kind))
-    except OSError:
-        pass
+    for path in (backup_path(library_id, book_id, kind),
+                 legacy_path(library_id, book_id, kind)):
+        try:
+            os.remove(path)
+        except OSError:
+            pass
 
 
 def prune(max_files=MAX_BACKUPS):

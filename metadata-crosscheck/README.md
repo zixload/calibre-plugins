@@ -128,7 +128,7 @@ must be to count as the same work.
 
 The original title appears at the top of the description, so it can be copied
 into a column such as `#original_title` — which
-[Stylish Cover Generator](../stylish-cover-generator/) reads for its Asian
+[Stylish Covers](../stylish-covers/) reads for its Asian
 subtitle.
 
 ## Licence

@@ -20,11 +20,11 @@ import tempfile
 from calibre.db.legacy import LibraryDatabase
 from calibre.ebooks.metadata.book.base import Metadata
 
-from calibre_plugins.stylish_cover_generator import backup
-from calibre_plugins.stylish_cover_generator.generator import (BookInfo,
+from calibre_plugins.stylish_covers import backup
+from calibre_plugins.stylish_covers.generator import (BookInfo,
                                                                merged_settings,
                                                                render_cover_bytes)
-from calibre_plugins.stylish_cover_generator.imageops import placeholder, to_bytes
+from calibre_plugins.stylish_covers.imageops import placeholder, to_bytes
 
 
 def main():

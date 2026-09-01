@@ -14,9 +14,9 @@ import sys
 
 from calibre.gui2 import Application
 
-from calibre_plugins.stylish_cover_generator.config import ConfigWidget, get_settings
-from calibre_plugins.stylish_cover_generator.generator import BookInfo
-from calibre_plugins.stylish_cover_generator.widgets import PreviewDialog
+from calibre_plugins.stylish_covers.config import ConfigWidget, get_settings
+from calibre_plugins.stylish_covers.generator import BookInfo
+from calibre_plugins.stylish_covers.widgets import PreviewDialog
 
 
 def main():

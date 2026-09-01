@@ -15,8 +15,8 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
-from stylish_cover_generator import presets as presets_mod  # noqa: E402
-from stylish_cover_generator.generator import (BookInfo, merged_settings,  # noqa: E402
+from stylish_covers import presets as presets_mod  # noqa: E402
+from stylish_covers.generator import (BookInfo, merged_settings,  # noqa: E402
                                                render_cover)
 
 CASES = [
