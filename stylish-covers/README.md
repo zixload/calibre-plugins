@@ -59,7 +59,7 @@ settings on the right.</sub>
 
 ## Installation
 
-1. **[Download stylish-covers.zip](https://github.com/zixload/calibre-plugins/releases/download/stylish-covers-v2.0.1/stylish-covers.zip)** (v2.0.1).
+1. **[Download stylish-covers.zip](https://github.com/zixload/calibre-plugins/releases/download/stylish-covers-v2.1.0/stylish-covers.zip)** (v2.1.0).
 2. In calibre: **Preferences → Plugins → Load plugin from file**, and pick the
    ZIP.
 3. calibre asks which toolbars to add the button to. **Tick both "The main

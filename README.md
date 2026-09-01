@@ -29,7 +29,7 @@ previous cover.
 It also **pushes the covers onto a connected Kobo** without resending the
 books, so a cover change never costs you your reading position.
 
-⬇ **[Download stylish-covers.zip (v2.0.1)](https://github.com/zixload/calibre-plugins/releases/download/stylish-covers-v2.0.1/stylish-covers.zip)**
+⬇ **[Download stylish-covers.zip (v2.1.0)](https://github.com/zixload/calibre-plugins/releases/download/stylish-covers-v2.1.0/stylish-covers.zip)**
  · [documentation](stylish-covers/)
 
 ## Metadata Tidy
