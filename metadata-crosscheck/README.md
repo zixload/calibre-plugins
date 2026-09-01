@@ -77,7 +77,9 @@ nothing in common with what you searched is discarded.
 Cross-Check is a **metadata source**, not a toolbar button: it will never add
 an icon. It works inside the download you already use.
 
-1. Install it, then **restart calibre**.
+1. **[Download metadata-crosscheck.zip](https://github.com/zixload/calibre-plugins/releases/download/metadata-crosscheck-v1.0.0/metadata-crosscheck.zip)** (v1.0.0),
+   then in calibre: **Preferences → Plugins → Load plugin from file**. Pick the
+   ZIP and **restart calibre**.
 2. **Preferences → Sharing → Metadata download**: *Cross-Check* appears in the
    source list, ticked. In the plugin list of Preferences it sits under
    *Metadata source*, not under *User interface action*.

@@ -19,6 +19,13 @@ This plugin writes the thumbnails and nothing else. **Your reading position,
 bookmarks and annotations are untouched**, because the files they point at are
 never replaced.
 
+## Installation
+
+1. **[Download kobo-cover-pusher.zip](https://github.com/zixload/calibre-plugins/releases/download/kobo-cover-pusher-v1.0.0/kobo-cover-pusher.zip)** (v1.0.0).
+2. In calibre: **Preferences → Plugins → Load plugin from file**, and pick the
+   ZIP.
+3. Accept adding the button to the toolbar, then **restart calibre**.
+
 ## Usage
 
 Connect the Kobo, wait for calibre to show it, open the device view once so

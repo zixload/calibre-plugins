@@ -37,7 +37,23 @@ fail. The ZIP holds the content of the package at its root; `tools/`,
 `samples/` and `__pycache__/` are excluded.
 
 The version of record is `version = (x, y, z)` in `__init__.py`. Tags are
-prefixed with the plugin name, e.g. `stylish-cover-generator-v1.0.1`.
+prefixed with the plugin name, e.g. `stylish-cover-generator-v1.0.2`.
+
+## Releasing
+
+One release per plugin, on its own tag, with its ZIP attached:
+
+```bash
+python build.py <plugin>
+git tag -a <plugin>-vX.Y.Z -m "<Name> X.Y.Z" && git push origin <plugin>-vX.Y.Z
+gh release create <plugin>-vX.Y.Z dist/<plugin>.zip --title "<Name> X.Y.Z" --notes "..."
+```
+
+Bump the version whenever the plugin's code changed since its last tag, so a
+published ZIP always matches the tag it hangs from. The download links in the
+READMEs point at the tagged asset, so they need updating at the same time —
+`/releases/latest/` is useless here, since "latest" is whichever plugin was
+released last.
 
 ---
 

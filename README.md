@@ -3,6 +3,26 @@
 My [calibre](https://calibre-ebook.com/) plugins. One folder per plugin, one
 installable ZIP per plugin.
 
+## Download
+
+| Plugin | Version | ZIP |
+|---|---|---|
+| Stylish Cover Generator | 1.0.2 | **[stylish-cover-generator.zip](https://github.com/zixload/calibre-plugins/releases/download/stylish-cover-generator-v1.0.2/stylish-cover-generator.zip)** |
+| Metadata Tidy | 1.0.0 | **[metadata-tidy.zip](https://github.com/zixload/calibre-plugins/releases/download/metadata-tidy-v1.0.0/metadata-tidy.zip)** |
+| Kobo Cover Pusher | 1.0.0 | **[kobo-cover-pusher.zip](https://github.com/zixload/calibre-plugins/releases/download/kobo-cover-pusher-v1.0.0/kobo-cover-pusher.zip)** |
+| Cross-Check | 1.0.0 | **[metadata-crosscheck.zip](https://github.com/zixload/calibre-plugins/releases/download/metadata-crosscheck-v1.0.0/metadata-crosscheck.zip)** |
+
+Every version is listed on the
+[Releases](https://github.com/zixload/calibre-plugins/releases) page.
+
+**To install**: in calibre, **Preferences → Plugins → Load plugin from file**,
+pick the ZIP, then **restart calibre**. Nothing else to install — everything
+the plugins need already ships with calibre, and none of them phones home
+except Cross-Check, which is a metadata source and only queries the public
+APIs you tick.
+
+Building from source is covered in [DEVELOPING.md](DEVELOPING.md).
+
 ## Stylish Cover Generator
 
 Builds real webnovel / dark fantasy covers out of the artwork a book already

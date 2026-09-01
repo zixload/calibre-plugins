@@ -59,8 +59,7 @@ settings on the right.</sub>
 
 ## Installation
 
-1. Download `stylish-cover-generator.zip` from the
-   [Releases](https://github.com/zixload/calibre-plugins/releases) page.
+1. **[Download stylish-cover-generator.zip](https://github.com/zixload/calibre-plugins/releases/download/stylish-cover-generator-v1.0.2/stylish-cover-generator.zip)** (v1.0.2).
 2. In calibre: **Preferences → Plugins → Load plugin from file**, and pick the
    ZIP.
 3. Accept adding the button to the toolbar, then **restart calibre**.
