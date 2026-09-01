@@ -85,7 +85,8 @@ authors, tags and description around a series that is already correct.
 1. **[Download metadata-tidy.zip](https://github.com/zixload/calibre-plugins/releases/download/metadata-tidy-v1.0.0/metadata-tidy.zip)** (v1.0.0).
 2. In calibre: **Preferences → Plugins → Load plugin from file**, and pick the
    ZIP.
-3. Accept adding the button to the toolbar, then **restart calibre**.
+3. calibre asks which toolbars to add the button to; accept.
+4. **Restart calibre.**
 
 ## Usage
 

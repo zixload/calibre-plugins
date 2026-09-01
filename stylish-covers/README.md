@@ -62,7 +62,11 @@ settings on the right.</sub>
 1. **[Download stylish-covers.zip](https://github.com/zixload/calibre-plugins/releases/download/stylish-covers-v2.0.0/stylish-covers.zip)** (v2.0.0).
 2. In calibre: **Preferences → Plugins → Load plugin from file**, and pick the
    ZIP.
-3. Accept adding the button to the toolbar, then **restart calibre**.
+3. calibre asks which toolbars to add the button to. **Tick both "The main
+   toolbar" and "The main toolbar when a device is connected"** — they are
+   separate lists, and without the second one the button vanishes exactly when
+   you plug your Kobo in, which is when you need *Push covers to the Kobo*.
+4. **Restart calibre.**
 
 Nothing else to install: everything the plugin needs already ships with
 calibre, and it never touches the network.

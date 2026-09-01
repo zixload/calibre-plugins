@@ -4,9 +4,13 @@ My [calibre](https://calibre-ebook.com/) plugins. One folder per plugin, one
 installable ZIP per plugin.
 
 **To install any of them**: download the ZIP below, then in calibre
-**Preferences → Plugins → Load plugin from file**, pick it, and **restart
-calibre**. Nothing else to install — everything the plugins need already ships
-with calibre.
+**Preferences → Plugins → Load plugin from file** and pick it. calibre asks
+which toolbars to put the button in — tick both the main toolbar and the one
+shown when a device is connected, they are separate lists. Then **restart
+calibre**.
+
+Nothing else to install: everything the plugins need already ships with
+calibre.
 
 ## Stylish Covers
 
