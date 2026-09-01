@@ -3,25 +3,10 @@
 My [calibre](https://calibre-ebook.com/) plugins. One folder per plugin, one
 installable ZIP per plugin.
 
-## Download
-
-| Plugin | Version | ZIP |
-|---|---|---|
-| Stylish Cover Generator | 1.0.2 | **[stylish-cover-generator.zip](https://github.com/zixload/calibre-plugins/releases/download/stylish-cover-generator-v1.0.2/stylish-cover-generator.zip)** |
-| Metadata Tidy | 1.0.0 | **[metadata-tidy.zip](https://github.com/zixload/calibre-plugins/releases/download/metadata-tidy-v1.0.0/metadata-tidy.zip)** |
-| Kobo Cover Pusher | 1.0.0 | **[kobo-cover-pusher.zip](https://github.com/zixload/calibre-plugins/releases/download/kobo-cover-pusher-v1.0.0/kobo-cover-pusher.zip)** |
-| Cross-Check | 1.0.0 | **[metadata-crosscheck.zip](https://github.com/zixload/calibre-plugins/releases/download/metadata-crosscheck-v1.0.0/metadata-crosscheck.zip)** |
-
-Every version is listed on the
-[Releases](https://github.com/zixload/calibre-plugins/releases) page.
-
-**To install**: in calibre, **Preferences → Plugins → Load plugin from file**,
-pick the ZIP, then **restart calibre**. Nothing else to install — everything
-the plugins need already ships with calibre, and none of them phones home
-except Cross-Check, which is a metadata source and only queries the public
-APIs you tick.
-
-Building from source is covered in [DEVELOPING.md](DEVELOPING.md).
+**To install any of them**: download the ZIP below, then in calibre
+**Preferences → Plugins → Load plugin from file**, pick it, and **restart
+calibre**. Nothing else to install — everything the plugins need already ships
+with calibre.
 
 ## Stylish Cover Generator
 
@@ -37,7 +22,8 @@ Four presets, automatic typography, automatic contrast behind the text, full
 chinese / korean / japanese support, batch mode and one-click restore of the
 previous cover.
 
-**[Documentation and installation →](stylish-cover-generator/)**
+⬇ **[Download stylish-cover-generator.zip (v1.0.2)](https://github.com/zixload/calibre-plugins/releases/download/stylish-cover-generator-v1.0.2/stylish-cover-generator.zip)**
+ · [documentation](stylish-cover-generator/)
 
 ## Metadata Tidy
 
@@ -50,7 +36,8 @@ Every change is shown in a preview table before anything is written, rows can
 be unticked or corrected by hand, and one menu entry undoes the whole run. It
 refuses to guess: a title without a volume marker is left strictly alone.
 
-**[Documentation and installation →](metadata-tidy/)**
+⬇ **[Download metadata-tidy.zip (v1.0.0)](https://github.com/zixload/calibre-plugins/releases/download/metadata-tidy-v1.0.0/metadata-tidy.zip)**
+ · [documentation](metadata-tidy/)
 
 ## Kobo Cover Pusher
 
@@ -62,7 +49,8 @@ A Kobo never reads the cover out of the EPUB: it shows thumbnails it generated
 once, which is why a new cover in calibre changes nothing on the device until
 something rewrites them.
 
-**[Documentation and installation →](kobo-cover-pusher/)**
+⬇ **[Download kobo-cover-pusher.zip (v1.0.0)](https://github.com/zixload/calibre-plugins/releases/download/kobo-cover-pusher-v1.0.0/kobo-cover-pusher.zip)**
+ · [documentation](kobo-cover-pusher/)
 
 ## Cross-Check
 
@@ -75,7 +63,11 @@ and badly for manga, light novels and web novels: asked about *Lord of the
 Mysteries*, Amazon offers a diet cookbook, while Cross-Check returns the right
 work, its author and its original title 诡秘之主, confirmed by three sources.
 
-**[Documentation and installation →](metadata-crosscheck/)**
+Being a metadata source, it adds no toolbar button: it appears in
+**Preferences → Metadata download**.
+
+⬇ **[Download metadata-crosscheck.zip (v1.0.0)](https://github.com/zixload/calibre-plugins/releases/download/metadata-crosscheck-v1.0.0/metadata-crosscheck.zip)**
+ · [documentation](metadata-crosscheck/)
 
 ## Using them together
 
@@ -95,6 +87,10 @@ treats a whole manga as one work and cannot know that your file is volume 2 of
 Tidy reads.
 
 ---
+
+Older versions are on the
+[Releases](https://github.com/zixload/calibre-plugins/releases) page, and
+building from source is covered in [DEVELOPING.md](DEVELOPING.md).
 
 Requires calibre 6 or later. Tested on calibre 9.13 under Windows 11.
 Licensed GPL-3.0, like calibre itself.
