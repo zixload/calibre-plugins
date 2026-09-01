@@ -23,7 +23,7 @@ class StylishCoverGenerator(InterfaceActionBase):
                    'presets, with automatic contrast and CJK support.')
     supported_platforms = ['windows', 'osx', 'linux']
     author = 'huosh1'
-    version = (1, 0, 1)
+    version = (1, 0, 2)
     minimum_calibre_version = (6, 0, 0)
 
     actual_plugin = 'calibre_plugins.stylish_cover_generator.action:StylishCoverAction'
