@@ -63,9 +63,22 @@ Being a metadata source, it adds no toolbar button: it appears in
 ⬇ **[Download metadata-crosscheck.zip (v1.0.0)](https://github.com/zixload/calibre-plugins/releases/download/metadata-crosscheck-v1.0.0/metadata-crosscheck.zip)**
  · [documentation](metadata-crosscheck/)
 
+## Goodreads Export
+
+Writes a CSV that Goodreads' import page accepts: the exact column names it
+expects, ratings halved from calibre's 0 to 10 scale, tags turned into
+shelves, dates cleaned up and undefined ones left blank.
+
+calibre exports CSV on its own, but with its own headers, its authors joined
+by ampersands and its ratings on the wrong scale — which Goodreads rejects
+without saying why.
+
+⬇ **[Download goodreads-export.zip (v1.0.0)](https://github.com/zixload/calibre-plugins/releases/download/goodreads-export-v1.0.0/goodreads-export.zip)**
+ · [documentation](goodreads-export/)
+
 ## Using them together
 
-The three plugins cover four steps, and **the order matters**.
+The plugins cover a chain, and **the order matters**.
 
 | # | Step | Plugin | Why here |
 |---|---|---|---|
@@ -73,6 +86,7 @@ The three plugins cover four steps, and **the order matters**.
 | 2 | Fill authors, tags, description, publisher, year, cover | **Cross-Check**, through calibre's *Download metadata* | no online source knows how your files are split into volumes, which is why step 1 comes before |
 | 3 | Build the covers | **Stylish Covers** | now that the series is filled in, presets can print it |
 | 4 | Refresh the covers on the Kobo | **Stylish Covers** again | writes the thumbnails without resending the books |
+| 5 | Publish the shelf on Goodreads | **Goodreads Export** | last, so the CSV carries the metadata the earlier steps filled in |
 
 The two metadata plugins are complementary, not alternatives: Cross-Check
 never returns a series or a volume number for manga and light novels — AniList

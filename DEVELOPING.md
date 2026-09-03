@@ -296,3 +296,38 @@ paths, so it runs on a plain python with no calibre installed.
 - Jikan proxies MyAnimeList and returns HTTP 504 whenever MAL is unwell, which
   is why it ships disabled.
 - NovelUpdates is not usable: it answers HTTP 403 behind Cloudflare.
+
+---
+
+# Goodreads Export
+
+| File | Role | Depends on |
+|---|---|---|
+| `__init__.py` | plugin declaration | `calibre.customize` |
+| `action.py` | toolbar, menu, reading the library, writing the file | calibre + Qt |
+| `config.py` | persistent settings + configuration dialog | calibre + Qt |
+| `exporter.py` | every conversion rule, and the CSV writer | nothing |
+
+`exporter.py` takes plain dicts, so the rules are tested without calibre:
+
+```bash
+python tools/test_exporter.py
+python tools/test_exporter.py --sample "C:/path/sample_export.csv"
+calibre-debug tools/make_icon.py
+```
+
+The `--sample` form compares our header against the file Goodreads publishes
+on its import page and fails if they differ. Keep a copy of that sample and
+run it after any change to `COLUMNS`; the importer matches on those exact
+strings, and a silent drift would produce a file Goodreads accepts and then
+quietly ignores.
+
+## Conversions worth knowing
+
+- **Ratings are always halved.** calibre stores 0 to 10, two per star, so a 10
+  is five stars and a 5 is two and a half. Guessing the scale from the value
+  would read a 5 as five stars, wrong by half the range.
+- **Year 101 means undefined** in calibre and must be written as an empty
+  cell, not as the year 101.
+- **Shelf names** are lowercased, spaces hyphenated, commas, quotes and
+  semicolons removed: Goodreads rejects them.
